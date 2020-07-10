@@ -117,7 +117,22 @@ template<typename T> struct ArrayPtr
 };
 
 // Converts ArrayPtr to ArrayPtr of bytes
-template<typename T> ArrayPtr<byte> to_byte_array(ArrayPtr<T> ptr){return {static_cast<byte*>(ptr.data), ptr.size * sizeof(T)};}
+template<typename T> ArrayPtr<byte> to_byte_array_ptr(ArrayPtr<T> ptr){return {static_cast<byte*>(ptr.data), ptr.size * sizeof(T)};}
 
-// Creates an ArrayPtr from a raw array
-#define ARRAY_PTR(x) ArrayPtr<std::remove_all_extents<decltype(x)>::type>{x, ARRAY_SIZE(x)}
+// Get underlying type of array
+#define ARRAY_TYPE(x) std::remove_all_extents<decltype(x)>::type
+
+// Size of array in bytes
+#define ARRAY_BYTE_SIZE(x) ARRAY_SIZE(x) * sizeof(ARRAY_TYPE(x))
+
+// Creates ArrayPtr from raw array
+#define ARRAY_PTR(x) ArrayPtr<ARRAY_TYPE(x)>{x, ARRAY_SIZE(x)}
+
+// Memsets array to zero
+#define ARRAY_ZERO(x) memset(x, 0, ARRAY_BYTE_SIZE(x))
+
+// Memcopies from src to dst
+#define ARRAY_COPY(dst, src) \
+	ASSERT_TRUE(ARRAY_SIZE(dst) >= ARRAY_SIZE(src), "Destination array smaller than source array"); \
+	memcpy(dst, src, ARRAY_BYTE_SIZE(src))
+
