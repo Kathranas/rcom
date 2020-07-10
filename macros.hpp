@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cstddef>
+#include <type_traits>
+
 // Remove params
 #define EAT(...)
 
@@ -13,8 +16,18 @@
 // Make into string
 #define STRINGIFY(x) #x
 
-// Array length
-#define ARRAY_SIZE(x) (sizeof(x) / sizeof(*x))
+// Implementation of array size macro
+namespace
+{
+	template<typename T> inline constexpr size_t array_size_imp()
+	{
+		static_assert(std::is_array<T>(), "SIZE type is not an array");
+		return std::extent<T>::value;
+	}
+}
+
+// Gets the size of the array. Static assert for array types
+#define ARRAY_SIZE(x) array_size_imp<decltype(x)>()
 
 // Implementation of the defer macro
 namespace
