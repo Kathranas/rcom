@@ -1,9 +1,12 @@
 #pragma once
 
-#include <cstddef>
 #include <cstdlib>
 #include <cstdio>
+#include <cstdint>
+#include <cstring>
 #include <type_traits>
+
+typedef uint8_t byte;
 
 // Remove params
 #define EAT(...)
@@ -85,21 +88,17 @@ namespace
 	#define ASSERT_FALSE(x, msg)
 #endif
 
-// Holds a ponter to a array and its size
+// Holds a pointer to an array and its size
 template<typename T> struct ArrayPtr
 {
 	T*     data;
 	size_t size;
 
-	// Use default constructor + destructor
+	// Use default constructors and destructors
 	ArrayPtr()                           = default;
 	~ArrayPtr()                          = default;
-
-	// Allow move construction
 	ArrayPtr(ArrayPtr&&)                 = default;
 	ArrayPtr& operator=(ArrayPtr&&)      = default;
-
-	// Allow copy construction
 	ArrayPtr(const ArrayPtr&)            = default;
 	ArrayPtr& operator=(const ArrayPtr&) = default;
 
@@ -117,7 +116,10 @@ template<typename T> struct ArrayPtr
 	operator ArrayPtr<const T>() const {return {data, size};}
 };
 
-// Creates an ArrayPtr from a c array
+// Converts ArrayPtr to ArrayPtr of bytes
+template<typename T> ArrayPtr<byte> to_byte_array(ArrayPtr<T> ptr){return {static_cast<byte*>(ptr.data), ptr.size * sizeof(T)};}
+
+// Creates an ArrayPtr from a raw array
 #define ARRAY_PTR(x) ArrayPtr<std::remove_all_extents<decltype(x)>::type>{x, ARRAY_SIZE(x)}
 
 // Wrapper around an array that knows its own size
