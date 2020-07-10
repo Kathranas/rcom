@@ -136,3 +136,7 @@ template<typename T> ArrayPtr<byte> to_byte_array_ptr(ArrayPtr<T> ptr){return {s
 	ASSERT_TRUE(ARRAY_SIZE(dst) >= ARRAY_SIZE(src), "Destination array smaller than source array"); \
 	memcpy(dst, src, ARRAY_BYTE_SIZE(src))
 
+inline bool strequal(const char* s1, const char* s2)
+{
+	return strcmp(s1, s2) == 0;
+}
