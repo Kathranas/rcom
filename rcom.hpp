@@ -6,6 +6,7 @@
 #include <cstring>
 #include <type_traits>
 
+// Common typedefs
 typedef uint8_t byte;
 
 // Remove params
@@ -27,7 +28,7 @@ namespace
 {
 	template<typename T> inline constexpr size_t array_size_imp()
 	{
-		static_assert(std::is_array<T>(), "SIZE type is not an array");
+		static_assert(std::is_array<T>(), "Array size type is not an array");
 		return std::extent<T>::value;
 	}
 }
@@ -136,6 +137,7 @@ template<typename T> ArrayPtr<byte> to_byte_array_ptr(ArrayPtr<T> ptr){return {s
 	ASSERT_TRUE(ARRAY_SIZE(dst) >= ARRAY_SIZE(src), "Destination array smaller than source array"); \
 	memcpy(dst, src, ARRAY_BYTE_SIZE(src))
 
+// String comparison
 inline bool strequal(const char* s1, const char* s2)
 {
 	return strcmp(s1, s2) == 0;
