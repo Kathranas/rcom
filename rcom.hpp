@@ -62,10 +62,12 @@ namespace
 {
 	template<typename T> inline constexpr size_t array_size_imp()
 	{
-		static_assert(std::is_array<T>(), "Array size type is not an array");
+		static_assert(std::is_array<T>(), "Non array passed as argument to array size macro");
 		return std::extent<T>::value;
 	}
 }
+
+// NOTE: These are for use with raw arrays only (Not pointers to arrays or ArrayPtrs)
 
 // Gets the size of the array. Static assert for array types
 #define ARRAY_SIZE(x) array_size_imp<decltype(x)>()
