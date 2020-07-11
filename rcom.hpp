@@ -23,6 +23,40 @@ typedef uint8_t byte;
 #define STRINGIFY(x) #x
 #define XSTRINGIFY(x) STRINGIFY(x)
 
+// Holds a pointer to an array and its size
+template<typename T> struct ArrayPtr
+{
+	T*     data;
+	size_t size;
+
+	// Use default constructors and destructors
+	ArrayPtr()                           = default;
+	~ArrayPtr()                          = default;
+	ArrayPtr(ArrayPtr&&)                 = default;
+	ArrayPtr& operator=(ArrayPtr&&)      = default;
+	ArrayPtr(const ArrayPtr&)            = default;
+	ArrayPtr& operator=(const ArrayPtr&) = default;
+
+	// Array access
+	      T& operator[](size_t i)       {return data[i];};
+	const T& operator[](size_t i) const {return data[i];}
+
+	// Used by range for loop
+	      T* begin()       {return data;}
+	const T* begin() const {return data;}
+	      T* end()         {return data + size;}
+	const T* end()   const {return data + size;}
+
+	// Implicit conversion to const
+	operator ArrayPtr<const T>() const {return {data, size};}
+};
+
+// Converts ArrayPtr to ArrayPtr of bytes
+template<typename T> ArrayPtr<byte> to_byte_array_ptr(ArrayPtr<T> ptr)
+{
+	return {static_cast<byte*>(ptr.data), ptr.size * sizeof(T)};
+}
+
 // Implementation of array size macro
 namespace
 {
@@ -35,6 +69,28 @@ namespace
 
 // Gets the size of the array. Static assert for array types
 #define ARRAY_SIZE(x) array_size_imp<decltype(x)>()
+
+// Get underlying type of array
+#define ARRAY_TYPE(x) std::remove_all_extents<decltype(x)>::type
+
+// Size of array in bytes
+#define ARRAY_BYTE_SIZE(x) ARRAY_SIZE(x) * sizeof(ARRAY_TYPE(x))
+
+// Creates ArrayPtr from raw array
+#define ARRAY_PTR(x) ArrayPtr<ARRAY_TYPE(x)>{x, ARRAY_SIZE(x)}
+
+// Memsets array to zero
+#define ARRAY_ZERO(x) memset(x, 0, ARRAY_BYTE_SIZE(x))
+
+// Memcopies from src to dst
+#define ARRAY_COPY(dst, src) ASSERT_TRUE(ARRAY_SIZE(dst) >= ARRAY_SIZE(src), "Destination array smaller than source array"); \
+	memcpy(dst, src, ARRAY_BYTE_SIZE(src))
+
+// String comparison
+inline bool strequal(const char* s1, const char* s2)
+{
+	return strcmp(s1, s2) == 0;
+}
 
 // Implementation of the defer macro
 namespace
@@ -89,56 +145,3 @@ namespace
 	#define ASSERT_FALSE(x, msg)
 #endif
 
-// Holds a pointer to an array and its size
-template<typename T> struct ArrayPtr
-{
-	T*     data;
-	size_t size;
-
-	// Use default constructors and destructors
-	ArrayPtr()                           = default;
-	~ArrayPtr()                          = default;
-	ArrayPtr(ArrayPtr&&)                 = default;
-	ArrayPtr& operator=(ArrayPtr&&)      = default;
-	ArrayPtr(const ArrayPtr&)            = default;
-	ArrayPtr& operator=(const ArrayPtr&) = default;
-
-	// Array access
-	      T& operator[](size_t i)       {return data[i];};
-	const T& operator[](size_t i) const {return data[i];}
-
-	// Used by range for loop
-	      T* begin()       {return data;}
-	const T* begin() const {return data;}
-	      T* end()         {return data + size;}
-	const T* end()   const {return data + size;}
-
-	// Implicit conversion to const
-	operator ArrayPtr<const T>() const {return {data, size};}
-};
-
-// Converts ArrayPtr to ArrayPtr of bytes
-template<typename T> ArrayPtr<byte> to_byte_array_ptr(ArrayPtr<T> ptr){return {static_cast<byte*>(ptr.data), ptr.size * sizeof(T)};}
-
-// Get underlying type of array
-#define ARRAY_TYPE(x) std::remove_all_extents<decltype(x)>::type
-
-// Size of array in bytes
-#define ARRAY_BYTE_SIZE(x) ARRAY_SIZE(x) * sizeof(ARRAY_TYPE(x))
-
-// Creates ArrayPtr from raw array
-#define ARRAY_PTR(x) ArrayPtr<ARRAY_TYPE(x)>{x, ARRAY_SIZE(x)}
-
-// Memsets array to zero
-#define ARRAY_ZERO(x) memset(x, 0, ARRAY_BYTE_SIZE(x))
-
-// Memcopies from src to dst
-#define ARRAY_COPY(dst, src) \
-	ASSERT_TRUE(ARRAY_SIZE(dst) >= ARRAY_SIZE(src), "Destination array smaller than source array"); \
-	memcpy(dst, src, ARRAY_BYTE_SIZE(src))
-
-// String comparison
-inline bool strequal(const char* s1, const char* s2)
-{
-	return strcmp(s1, s2) == 0;
-}
