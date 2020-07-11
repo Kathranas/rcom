@@ -23,6 +23,33 @@ typedef uint8_t byte;
 #define STRINGIFY(x) #x
 #define XSTRINGIFY(x) STRINGIFY(x)
 
+// Assert implementation
+namespace
+{
+	inline void assert_imp(bool x, const char* msg, const char* file, int line)
+	{
+		if(!x)
+		{
+			// Log the failed assertion
+			fprintf(stderr, "Assert failed: %s\n file: %s\n line: %i\n", msg, file, line);
+	
+			// Crash
+			abort();
+		}
+	}
+}
+
+#if defined(RCOM_ASSERTS_ENABLED)
+	// Make sure this condition is true
+	#define ASSERT_TRUE(x, msg) assert_imp((x), (msg), __FILE__, __LINE__)
+
+	// Make sure this condition is false
+	#define ASSERT_FALSE(x, msg) assert_imp(!(x), (msg), __FILE__, __LINE__)
+#else
+	#define ASSERT_TRUE(x, msg)
+	#define ASSERT_FALSE(x, msg)
+#endif
+
 // Holds a pointer to an array and its size
 template<typename T> struct ArrayPtr
 {
@@ -49,12 +76,38 @@ template<typename T> struct ArrayPtr
 
 	// Implicit conversion to const
 	operator ArrayPtr<const T>() const {return {data, size};}
+
+	// Implicit conversion to void with correct size
+	operator ArrayPtr<void>() {return {data, sizeof(T) * size};}
 };
 
-// Converts ArrayPtr to ArrayPtr of bytes
-template<typename T> ArrayPtr<byte> to_byte_array_ptr(ArrayPtr<T> ptr)
+template<> struct ArrayPtr<void>
 {
-	return {static_cast<byte*>(ptr.data), ptr.size * sizeof(T)};
+	void*  data;
+	size_t size;
+
+	// Use default constructors and destructors
+	ArrayPtr()                           = default;
+	~ArrayPtr()                          = default;
+	ArrayPtr(ArrayPtr&&)                 = default;
+	ArrayPtr& operator=(ArrayPtr&&)      = default;
+	ArrayPtr(const ArrayPtr&)            = default;
+	ArrayPtr& operator=(const ArrayPtr&) = default;
+};
+
+inline void zero(ArrayPtr<void> dst)
+{
+	ASSERT_TRUE(dst.data, "Destination array is null");
+	ASSERT_TRUE(dst.size > 0, "Destination array has zero size");
+	memset(dst.data, 0, dst.size);
+}
+
+inline void copy(ArrayPtr<void> dst, ArrayPtr<void> src)
+{
+	ASSERT_TRUE(dst.data, "Destination array is null");
+	ASSERT_TRUE(src.data, "Source array is null");
+	ASSERT_TRUE(dst.size >= src.size, "Destination array is too small");
+	memcpy(dst.data, src.data, src.size);
 }
 
 // Implementation of array size macro
@@ -120,30 +173,4 @@ namespace
 // Call block of code at the end of scope
 #define DEFER_TO_SCOPE auto CONCAT(zz_defer_imp, __LINE__) = DeferTemp{} << [&]()
 
-// Assert implementation
-namespace
-{
-	inline void assert_imp(bool x, const char* msg, const char* file, int line)
-	{
-		if(!x)
-		{
-			// Log the failed assertion
-			fprintf(stderr, "Assert failed: %s\n file: %s\n line: %i\n", msg, file, line);
-	
-			// Crash
-			abort();
-		}
-	}
-}
-
-#if defined(RCOM_ASSERTS_ENABLED)
-	// Make sure this condition is true
-	#define ASSERT_TRUE(x, msg) assert_imp((x), (msg), __FILE__, __LINE__)
-
-	// Make sure this condition is false
-	#define ASSERT_FALSE(x, msg) assert_imp(!(x), (msg), __FILE__, __LINE__)
-#else
-	#define ASSERT_TRUE(x, msg)
-	#define ASSERT_FALSE(x, msg)
-#endif
 
