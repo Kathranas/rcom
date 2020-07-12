@@ -50,8 +50,10 @@ namespace
 	#define ASSERT_FALSE(x, msg)
 #endif
 
+// Forward declaration for void specialisation
 template<typename T> struct ArrayPtr;
 
+// Void specialisation since array access and iteration is not allowed
 template<> struct ArrayPtr<void>
 {
 	void*  data;
@@ -64,6 +66,8 @@ template<> struct ArrayPtr<void>
 	ArrayPtr& operator=(ArrayPtr&&)      = default;
 	ArrayPtr(const ArrayPtr&)            = default;
 	ArrayPtr& operator=(const ArrayPtr&) = default;
+
+	// No array access or iteration
 };
 
 // Holds a pointer to an array and its size
