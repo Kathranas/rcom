@@ -50,6 +50,22 @@ namespace
 	#define ASSERT_FALSE(x, msg)
 #endif
 
+template<typename T> struct ArrayPtr;
+
+template<> struct ArrayPtr<void>
+{
+	void*  data;
+	size_t size;
+
+	// Use default constructors and destructors
+	ArrayPtr()                           = default;
+	~ArrayPtr()                          = default;
+	ArrayPtr(ArrayPtr&&)                 = default;
+	ArrayPtr& operator=(ArrayPtr&&)      = default;
+	ArrayPtr(const ArrayPtr&)            = default;
+	ArrayPtr& operator=(const ArrayPtr&) = default;
+};
+
 // Holds a pointer to an array and its size
 template<typename T> struct ArrayPtr
 {
@@ -79,20 +95,6 @@ template<typename T> struct ArrayPtr
 
 	// Implicit conversion to void with correct size
 	operator ArrayPtr<void>() {return {data, sizeof(T) * size};}
-};
-
-template<> struct ArrayPtr<void>
-{
-	void*  data;
-	size_t size;
-
-	// Use default constructors and destructors
-	ArrayPtr()                           = default;
-	~ArrayPtr()                          = default;
-	ArrayPtr(ArrayPtr&&)                 = default;
-	ArrayPtr& operator=(ArrayPtr&&)      = default;
-	ArrayPtr(const ArrayPtr&)            = default;
-	ArrayPtr& operator=(const ArrayPtr&) = default;
 };
 
 inline void zero(ArrayPtr<void> dst)
@@ -129,16 +131,19 @@ namespace
 #define ARRAY_TYPE(x) std::remove_all_extents<decltype(x)>::type
 
 // Size of array in bytes
-#define ARRAY_BYTE_SIZE(x) ARRAY_SIZE(x) * sizeof(ARRAY_TYPE(x))
+#define ARRAY_SIZE_BYTES(x) ARRAY_SIZE(x) * sizeof(ARRAY_TYPE(x))
 
 // Creates ArrayPtr from raw array
 #define ARRAY_PTR(x) ArrayPtr<ARRAY_TYPE(x)>{x, ARRAY_SIZE(x)}
 
 // Memsets array to zero
-#define ARRAY_ZERO(x) memset(x, 0, ARRAY_BYTE_SIZE(x))
+#define ARRAY_ZERO(x) static_assert(std::is_array<decltype(x)>(), "Non array passed as argument to array zero macro"); \
+	memset(x, 0, ARRAY_BYTE_SIZE(x))
 
 // Memcopies from src to dst
-#define ARRAY_COPY(dst, src) ASSERT_TRUE(ARRAY_SIZE(dst) >= ARRAY_SIZE(src), "Destination array smaller than source array"); \
+#define ARRAY_COPY(dst, src) static_assert(std::is_array<decltype(dst)>(), "Non array passed as argument to array copy macro"); \
+	static_assert(std::is_array<decltype(src)>(), "Non array passed as argument to array copy macro"); \
+	ASSERT_TRUE(ARRAY_SIZE(dst) >= ARRAY_SIZE(src), "Destination array smaller than source array"); \
 	memcpy(dst, src, ARRAY_BYTE_SIZE(src))
 
 // String comparison
