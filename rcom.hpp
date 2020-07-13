@@ -52,31 +52,37 @@ namespace
 	#define ASSERT_FALSE(x, msg)
 #endif
 
-// Forward declaration for void specialisation
-template<typename T> struct ArrayPtr;
-
-// Void specialisation since array access and iteration is not allowed
-template<> struct ArrayPtr<void>
+// Pointer to an array of bytes
+struct BytePtr
 {
-	void*  data;
+	byte*  data;
 	size_t size;
 
 	// Compiler generated default constructor
-	ArrayPtr() = default;
+	BytePtr() = default;
 
 	// Construct from nullptr
-	ArrayPtr(std::nullptr_t) : data{nullptr}, size{0} {}
+	BytePtr(std::nullptr_t) : data{nullptr}, size{0} {}
 
-	// Construct from a pointer and size
-	ArrayPtr(void* t, size_t n) : data{t}, size{n} {}
+	// Construct from a pointer and size in bytes
+	BytePtr(void* t, size_t n) : data{static_cast<byte*>(t)}, size{n} {}
 
-	// Construct from objects
-	template<typename T> explicit ArrayPtr(T* t) : data{t}, size{sizeof(t)} {}
+	// Construct from pointers
+	// TODO Explicit for now as it interferes with array constructor resulting in invalid behaviour
+	template<typename T> explicit BytePtr(T* t) : data{reinterpret_cast<byte*>(t)}, size{sizeof(T)} {}
 
 	// Construct from arrays with correct size
-	template<typename T, size_t N> ArrayPtr(T(&t)[N]) : data{t}, size{N * sizeof(T)} {}
+	template<typename T, size_t N> BytePtr(T(&t)[N]) : data{reinterpret_cast<byte*>(t)}, size{N * sizeof(T)} {}
 
-	// No array access or iteration
+	// Array access
+	      byte& operator[](size_t i)       {return data[i];};
+	const byte& operator[](size_t i) const {return data[i];}
+
+	// Used by range for loop
+	      byte* begin()       {return data;}
+	const byte* begin() const {return data;}
+	      byte* end()         {return data + size;}
+	const byte* end()   const {return data + size;}
 };
 
 // Holds a pointer to an array and its size
@@ -110,18 +116,18 @@ template<typename T> struct ArrayPtr
 	// Implicit conversion to const
 	operator ArrayPtr<const T>() const {return {data, size};}
 
-	// Implicit conversion to void with correct size
-	operator ArrayPtr<void>() {return ArrayPtr<void>{data, size * sizeof(T)};}
+	// Implicit conversion to BytePtr
+	operator BytePtr() {return {data, size * sizeof(T)};}
 };
 
-inline void zero(ArrayPtr<void> dst)
+inline void zero(BytePtr dst)
 {
 	ASSERT_TRUE(dst.data, "Destination array is null");
 	ASSERT_TRUE(dst.size > 0, "Destination array has zero size");
 	memset(dst.data, 0, dst.size);
 }
 
-inline void copy(ArrayPtr<void> dst, ArrayPtr<void> src)
+inline void copy(BytePtr dst, BytePtr src)
 {
 	ASSERT_TRUE(dst.data, "Destination array is null");
 	ASSERT_TRUE(src.data, "Source array is null");
