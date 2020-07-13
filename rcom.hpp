@@ -4,7 +4,6 @@
 #include <cstdio>
 #include <cstdint>
 #include <cstring>
-#include <type_traits>
 
 // Common typedefs
 typedef uint8_t byte;
@@ -22,6 +21,9 @@ typedef uint8_t byte;
 // Make into string
 #define STRINGIFY(x) #x
 #define XSTRINGIFY(x) STRINGIFY(x)
+
+// Get size of array at compile time
+template<typename T, size_t N> inline constexpr size_t ARRAY_SIZE(T(&)[N]){return N;}
 
 // Assert implementation
 namespace
@@ -59,13 +61,7 @@ template<> struct ArrayPtr<void>
 	void*  data;
 	size_t size;
 
-	// Use default constructors and destructors
-	ArrayPtr()                           = default;
-	~ArrayPtr()                          = default;
-	ArrayPtr(ArrayPtr&&)                 = default;
-	ArrayPtr& operator=(ArrayPtr&&)      = default;
-	ArrayPtr(const ArrayPtr&)            = default;
-	ArrayPtr& operator=(const ArrayPtr&) = default;
+	template<typename T, size_t N> ArrayPtr(T(&t)[N]) : data{t}, size{N * sizeof(T)} {}
 
 	// No array access or iteration
 };
@@ -76,13 +72,8 @@ template<typename T> struct ArrayPtr
 	T*     data;
 	size_t size;
 
-	// Use default constructors and destructors
-	ArrayPtr()                           = default;
-	~ArrayPtr()                          = default;
-	ArrayPtr(ArrayPtr&&)                 = default;
-	ArrayPtr& operator=(ArrayPtr&&)      = default;
-	ArrayPtr(const ArrayPtr&)            = default;
-	ArrayPtr& operator=(const ArrayPtr&) = default;
+	// Construct from Array
+	template<size_t N> ArrayPtr(T(&t)[N]) : data{t}, size{N} {}
 
 	// Array access
 	      T& operator[](size_t i)       {return data[i];};
@@ -115,40 +106,6 @@ inline void copy(ArrayPtr<void> dst, ArrayPtr<void> src)
 	ASSERT_TRUE(dst.size >= src.size, "Destination array is too small");
 	memcpy(dst.data, src.data, src.size);
 }
-
-// Implementation of array size macro
-namespace
-{
-	template<typename T> inline constexpr size_t array_size_imp()
-	{
-		static_assert(std::is_array<T>(), "Non array passed as argument to array size macro");
-		return std::extent<T>::value;
-	}
-}
-
-// NOTE: These are for use with raw arrays only (Not pointers to arrays or ArrayPtrs)
-
-// Gets the size of the array. Static assert for array types
-#define ARRAY_SIZE(x) array_size_imp<decltype(x)>()
-
-// Get underlying type of array
-#define ARRAY_TYPE(x) std::remove_all_extents<decltype(x)>::type
-
-// Size of array in bytes
-#define ARRAY_SIZE_BYTES(x) ARRAY_SIZE(x) * sizeof(ARRAY_TYPE(x))
-
-// Creates ArrayPtr from raw array
-#define ARRAY_PTR(x) ArrayPtr<ARRAY_TYPE(x)>{x, ARRAY_SIZE(x)}
-
-// Memsets array to zero
-#define ARRAY_ZERO(x) static_assert(std::is_array<decltype(x)>(), "Non array passed as argument to array zero macro"); \
-	memset(x, 0, ARRAY_BYTE_SIZE(x))
-
-// Memcopies from src to dst
-#define ARRAY_COPY(dst, src) static_assert(std::is_array<decltype(dst)>(), "Non array passed as argument to array copy macro"); \
-	static_assert(std::is_array<decltype(src)>(), "Non array passed as argument to array copy macro"); \
-	ASSERT_TRUE(ARRAY_SIZE(dst) >= ARRAY_SIZE(src), "Destination array smaller than source array"); \
-	memcpy(dst, src, ARRAY_BYTE_SIZE(src))
 
 // String comparison
 inline bool strequal(const char* s1, const char* s2)
