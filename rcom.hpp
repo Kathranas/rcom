@@ -52,7 +52,7 @@ namespace
 	#define ASSERT_FALSE(x, msg)
 #endif
 
-// Pointer to an array of bytes
+// Pointer to an array of bytes. Useful for type erasure
 struct BytePtr
 {
 	byte*  data;
@@ -67,12 +67,12 @@ struct BytePtr
 	// Construct from a pointer and size in bytes
 	BytePtr(void* t, size_t n) : data{static_cast<byte*>(t)}, size{n} {}
 
-	// Construct from pointers
-	// TODO Explicit for now as it interferes with array constructor resulting in invalid behaviour
-	template<typename T> explicit BytePtr(T* t) : data{reinterpret_cast<byte*>(t)}, size{sizeof(T)} {}
-
-	// Construct from arrays with correct size
+	// Construct from array. Size is the size of the array
 	template<typename T, size_t N> BytePtr(T(&t)[N]) : data{reinterpret_cast<byte*>(t)}, size{N * sizeof(T)} {}
+
+	// Construct from pointer. Size is size of object pointed to by pointer
+	// NOTE: T given instead of T* to not form an ambiguity with array constructor
+	template<typename T> BytePtr(T t) : data{reinterpret_cast<byte*>(t)}, size{sizeof(*t)}{}
 
 	// Array access
 	      byte& operator[](size_t i)       {return data[i];};
