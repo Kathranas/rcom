@@ -61,7 +61,11 @@ template<> struct ArrayPtr<void>
 	void*  data;
 	size_t size;
 
-	template<typename T, size_t N> ArrayPtr(T(&t)[N]) : data{t}, size{N * sizeof(T)} {}
+	// Construct from objects
+	template<typename T> ArrayPtr(T* t) : data{t}, size{sizeof(t)} {}
+
+	// Construct from arrays with correct size (Only arrays hence explicit)
+	template<typename T, size_t N> explicit ArrayPtr(T(&t)[N]) : data{t}, size{N * sizeof(T)} {}
 
 	// No array access or iteration
 };
