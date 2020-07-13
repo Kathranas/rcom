@@ -52,27 +52,66 @@ namespace
 	#define ASSERT_FALSE(x, msg)
 #endif
 
-// Pointer to an array of bytes. Useful for type erasure
-struct BytePtr
+// Forward declaration
+template<typename T> struct ArrayPtr;
+
+// Const type erased array pointer
+template<> struct ArrayPtr<const void>
+{
+	const byte* data;
+	size_t      size;
+
+	// Compiler generated default constructor
+	ArrayPtr() = default;
+
+	// Construct from nullptr
+	ArrayPtr(std::nullptr_t) : data{nullptr}, size{0} {}
+
+	// Construct from const pointer and size in bytes
+	ArrayPtr(const void* t, size_t n) : data{static_cast<const byte*>(t)}, size{n} {}
+
+	// Construct from const ArrayPtr
+	template<typename T> ArrayPtr(ArrayPtr<const T> ptr) : ArrayPtr(ptr.data, ptr.size) {}
+
+	// Construct from const array. Size is the size of the array
+	template<typename T, size_t N> ArrayPtr(const T(&t)[N]) : data{reinterpret_cast<const byte*>(t)}, size{N * sizeof(T)} {}
+
+	// Construct from pointer. Size is size of object pointed to by pointer
+	// NOTE: T given instead of T* to not form an ambiguity with array constructor
+	template<typename T> ArrayPtr(const T t) : data{reinterpret_cast<const byte*>(t)}, size{sizeof(*t)}{}
+
+	// Array access
+	const byte& operator[](size_t i) const {return data[i];}
+
+	// Used by range for loop
+	const byte* begin() const {return data;}
+	const byte* end()   const {return data + size;}
+};
+
+// Non const type erase array pointer
+template<> struct ArrayPtr<void>
 {
 	byte*  data;
 	size_t size;
 
 	// Compiler generated default constructor
-	BytePtr() = default;
+	ArrayPtr() = default;
 
 	// Construct from nullptr
-	BytePtr(std::nullptr_t) : data{nullptr}, size{0} {}
+	ArrayPtr(std::nullptr_t) : data{nullptr}, size{0} {}
 
-	// Construct from a pointer and size in bytes
-	BytePtr(void* t, size_t n) : data{static_cast<byte*>(t)}, size{n} {}
+	// Construct from non const pointer and size in bytes
+	ArrayPtr(void* t, size_t n) : data{static_cast<byte*>(t)}, size{n} {}
 
-	// Construct from array. Size is the size of the array
-	template<typename T, size_t N> BytePtr(T(&t)[N]) : data{reinterpret_cast<byte*>(t)}, size{N * sizeof(T)} {}
+	// Construct from non const array. Size is the size of the array
+	template<typename T, size_t N> ArrayPtr(T(&t)[N]) : data{reinterpret_cast<byte*>(t)}, size{N * sizeof(T)} {}
 
 	// Construct from pointer. Size is size of object pointed to by pointer
 	// NOTE: T given instead of T* to not form an ambiguity with array constructor
-	template<typename T> BytePtr(T t) : data{reinterpret_cast<byte*>(t)}, size{sizeof(*t)}{}
+	template<typename T> ArrayPtr(T t) : data{reinterpret_cast<byte*>(t)}, size{sizeof(*t)}{}
+
+	// Construct from non const ArrayPtr
+	template<typename T> ArrayPtr(ArrayPtr<T> ptr) : ArrayPtr(ptr.data, ptr.size) {}
 
 	// Array access
 	      byte& operator[](size_t i)       {return data[i];};
@@ -83,6 +122,9 @@ struct BytePtr
 	const byte* begin() const {return data;}
 	      byte* end()         {return data + size;}
 	const byte* end()   const {return data + size;}
+
+	// Implicit conversion to const
+	operator ArrayPtr<const void>() const {return {data, size};}
 };
 
 // Holds a pointer to an array and its size
@@ -115,19 +157,16 @@ template<typename T> struct ArrayPtr
 
 	// Implicit conversion to const
 	operator ArrayPtr<const T>() const {return {data, size};}
-
-	// Implicit conversion to BytePtr
-	operator BytePtr() {return {data, size * sizeof(T)};}
 };
 
-inline void zero(BytePtr dst)
+inline void zero(ArrayPtr<void> dst)
 {
 	ASSERT_TRUE(dst.data, "Destination array is null");
 	ASSERT_TRUE(dst.size > 0, "Destination array has zero size");
 	memset(dst.data, 0, dst.size);
 }
 
-inline void copy(BytePtr dst, BytePtr src)
+inline void copy(ArrayPtr<void> dst, ArrayPtr<const void> src)
 {
 	ASSERT_TRUE(dst.data, "Destination array is null");
 	ASSERT_TRUE(src.data, "Source array is null");
