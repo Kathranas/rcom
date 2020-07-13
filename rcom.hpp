@@ -61,11 +61,20 @@ template<> struct ArrayPtr<void>
 	void*  data;
 	size_t size;
 
-	// Construct from objects
-	template<typename T> ArrayPtr(T* t) : data{t}, size{sizeof(t)} {}
+	// Compiler generated default constructor
+	ArrayPtr() = default;
 
-	// Construct from arrays with correct size (Only arrays hence explicit)
-	template<typename T, size_t N> explicit ArrayPtr(T(&t)[N]) : data{t}, size{N * sizeof(T)} {}
+	// Construct from nullptr
+	ArrayPtr(std::nullptr_t) : data{nullptr}, size{0} {}
+
+	// Construct from a pointer and size
+	ArrayPtr(void* t, size_t n) : data{t}, size{n} {}
+
+	// Construct from objects
+	template<typename T> explicit ArrayPtr(T* t) : data{t}, size{sizeof(t)} {}
+
+	// Construct from arrays with correct size
+	template<typename T, size_t N> ArrayPtr(T(&t)[N]) : data{t}, size{N * sizeof(T)} {}
 
 	// No array access or iteration
 };
@@ -76,7 +85,16 @@ template<typename T> struct ArrayPtr
 	T*     data;
 	size_t size;
 
-	// Construct from Array
+	// Compiler generated default constructor
+	ArrayPtr() = default;
+
+	// Construct from nullptr
+	ArrayPtr(std::nullptr_t) : data{nullptr}, size{0} {}
+
+	// Construct from pointer and size
+	ArrayPtr(T* t, size_t n) : data{t}, size{n} {}
+
+	// Construct from array with correct size
 	template<size_t N> ArrayPtr(T(&t)[N]) : data{t}, size{N} {}
 
 	// Array access
@@ -93,7 +111,7 @@ template<typename T> struct ArrayPtr
 	operator ArrayPtr<const T>() const {return {data, size};}
 
 	// Implicit conversion to void with correct size
-	operator ArrayPtr<void>() {return {data, sizeof(T) * size};}
+	operator ArrayPtr<void>() {return ArrayPtr<void>{data, size * sizeof(T)};}
 };
 
 inline void zero(ArrayPtr<void> dst)
