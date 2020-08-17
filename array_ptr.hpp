@@ -4,119 +4,114 @@
 #include <cstddef>
 #include <cstring>
 
-// Forward declaration
-template<typename T> struct ArrayPtr;
+template<typename T> class ArrayPtr;
 
-// Const type erased array pointer
-template<> struct ArrayPtr<const void>
+// Type erased pointer to a constant array of bytes
+class ConstBytePtr
 {
-	const uint8_t* data;
-	size_t         size;
+public:
+	ConstBytePtr() = default;
+	ConstBytePtr(std::nullptr_t) : data{nullptr}, size{0} {}
 
-	// Compiler generated default constructor
-	ArrayPtr() = default;
+	// Size in bytes
+	ConstBytePtr(const void* t, size_t n) : data{static_cast<const uint8_t*>(t)}, size{n} {}
 
-	// Construct from nullptr
-	ArrayPtr(std::nullptr_t) : data{nullptr}, size{0} {}
+	template<typename T> ConstBytePtr(ArrayPtr<T> ptr) : ConstBytePtr(ptr.get(), ptr.size() * sizeof(T)) {}
 
-	// Construct from const pointer and size in bytes
-	ArrayPtr(const void* t, size_t n) : data{static_cast<const uint8_t*>(t)}, size{n} {}
-
-	// Construct from const ArrayPtr
-	template<typename T> ArrayPtr(ArrayPtr<const T> ptr) : ArrayPtr(ptr.data, ptr.size) {}
-
-	// Construct from const array. Size is the size of the array
-	template<typename T, size_t N> ArrayPtr(const T(&t)[N]) : data{reinterpret_cast<const byte*>(t)}, size{N * sizeof(T)} {}
+	// Construct from array. Size is the size of the array
+	template<typename T, size_t N> ConstBytePtr(T(&t)[N]) : data{reinterpret_cast<const uint8_t*>(t)}, size{N * sizeof(T)} {}
 
 	// Construct from pointer. Size is size of object pointed to by pointer
 	// NOTE: T given instead of T* to not form an ambiguity with array constructor
-	template<typename T> ArrayPtr(const T t) : data{reinterpret_cast<const byte*>(t)}, size{sizeof(*t)}{}
+	template<typename T> ConstBytePtr(T t) : data{reinterpret_cast<const uint8_t*>(t)}, size{sizeof(*t)}{}
 
-	// Array access
-	const uint8_t& operator[](size_t i) const {return data[i];}
+	// Const only functions
+	inline const uint8_t& operator[](size_t i) const {return data[i];}
 
-	// Used by range for loop
-	const uint8_t* begin() const {return data;}
-	const uint8_t* end()   const {return data + size;}
+	inline const uint8_t* begin() const {return data;}
+	inline const uint8_t* end()   const {return data + size;}
+
+	inline const uint8_t* get()   const {return data;}
+	inline       size_t   len()   const {return size;}
+private:
+	const uint8_t* data;
+	      size_t   size;
 };
 
-// Non const type erase array pointer
-template<> struct ArrayPtr<void>
+// Type erased pointer to an array of bytes
+class BytePtr
 {
-	uint8_t* data;
-	size_t   size;
+public:
+	BytePtr() = default;
+	BytePtr(std::nullptr_t) : data{nullptr}, size{0} {}
 
-	// Compiler generated default constructor
-	ArrayPtr() = default;
+	// Size in bytes
+	BytePtr(void* t, size_t n) : data{static_cast<uint8_t*>(t)}, size{n} {}
 
-	// Construct from nullptr
-	ArrayPtr(std::nullptr_t) : data{nullptr}, size{0} {}
+	template<typename T> BytePtr(ArrayPtr<T> ptr) : BytePtr(ptr.get(), ptr.len() * sizeof(T)) {}
 
-	// Construct from non const pointer and size in bytes
-	ArrayPtr(void* t, size_t n) : data{static_cast<uint8_t*>(t)}, size{n} {}
-
-	// Construct from non const array. Size is the size of the array
-	template<typename T, size_t N> ArrayPtr(T(&t)[N]) : data{reinterpret_cast<byte*>(t)}, size{N * sizeof(T)} {}
+	// Construct from array. Size is the size of the array
+	template<typename T, size_t N> BytePtr(T(&t)[N]) : data{reinterpret_cast<uint8_t*>(t)}, size{N * sizeof(T)} {}
 
 	// Construct from pointer. Size is size of object pointed to by pointer
 	// NOTE: T given instead of T* to not form an ambiguity with array constructor
-	template<typename T> ArrayPtr(T t) : data{reinterpret_cast<byte*>(t)}, size{sizeof(*t)}{}
+	template<typename T> BytePtr(T t) : data{reinterpret_cast<uint8_t*>(t)}, size{sizeof(*t)}{}
 
-	// Construct from non const ArrayPtr
-	template<typename T> ArrayPtr(ArrayPtr<T> ptr) : ArrayPtr(ptr.data, ptr.size) {}
+	inline       uint8_t& operator[](size_t i)       {return data[i];};
+	inline const uint8_t& operator[](size_t i) const {return data[i];}
 
-	// Array access
-	      uint8_t& operator[](size_t i)       {return data[i];};
-	const uint8_t& operator[](size_t i) const {return data[i];}
+	inline       uint8_t* begin()       {return data;}
+	inline const uint8_t* begin() const {return data;}
+	inline       uint8_t* end()         {return data + size;}
+	inline const uint8_t* end()   const {return data + size;}
 
-	// Used by range for loop
-	      uint8_t* begin()       {return data;}
-	const uint8_t* begin() const {return data;}
-	      uint8_t* end()         {return data + size;}
-	const uint8_t* end()   const {return data + size;}
+	inline       uint8_t* get()         {return data;}
+	inline const uint8_t* get()   const {return data;}
+	inline       size_t   len()   const {return size;}
 
 	// Implicit conversion to const
-	operator ArrayPtr<const void>() const {return {data, size};}
+	operator ConstBytePtr() const {return {data, size};}
+private:
+	uint8_t* data;
+	size_t   size;
 };
 
 // Holds a pointer to an array and its size
-template<typename T> struct ArrayPtr
+template<typename T> class ArrayPtr
 {
-	T*     data;
-	size_t size;
-
-	// Compiler generated default constructor
+public:
 	ArrayPtr() = default;
-
-	// Construct from nullptr
 	ArrayPtr(std::nullptr_t) : data{nullptr}, size{0} {}
-
-	// Construct from pointer and size
 	ArrayPtr(T* t, size_t n) : data{t}, size{n} {}
 
 	// Construct from array with correct size
 	template<size_t N> ArrayPtr(T(&t)[N]) : data{t}, size{N} {}
 
-	// Array access
-	      T& operator[](size_t i)       {return data[i];};
-	const T& operator[](size_t i) const {return data[i];}
+	inline       T& operator[](size_t i)       {return data[i];};
+	inline const T& operator[](size_t i) const {return data[i];}
+ 
+	inline       T* begin()       {return data;}
+	inline const T* begin() const {return data;}
+	inline       T* end()         {return data + size;}
+	inline const T* end()   const {return data + size;}
 
-	// Used by range for loop
-	      T* begin()       {return data;}
-	const T* begin() const {return data;}
-	      T* end()         {return data + size;}
-	const T* end()   const {return data + size;}
+	inline       T* get()         {return data;}
+	inline const T* get()   const {return data;}
+	inline size_t   len()   const {return size;}
 
 	// Implicit conversion to const
 	operator ArrayPtr<const T>() const {return {data, size};}
+private:
+	T*     data;
+	size_t size;
 };
 
-inline void zero(ArrayPtr<void> dst)
+inline void zero(BytePtr dst)
 {
-	memset(dst.data, 0, dst.size);
+	memset(dst.get(), 0, dst.len());
 }
 
-inline void copy(ArrayPtr<void> dst, ArrayPtr<const void> src)
+inline void copy(BytePtr dst, ConstBytePtr src)
 {
-	memcpy(dst.data, src.data, src.size);
+	memcpy(dst.get(), src.get(), src.len());
 }
