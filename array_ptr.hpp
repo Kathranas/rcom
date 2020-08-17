@@ -33,6 +33,8 @@ public:
 
 	inline const uint8_t* get()   const {return data;}
 	inline       size_t   len()   const {return size;}
+
+	operator bool() const {return data;}
 private:
 	const uint8_t* data;
 	      size_t   size;
@@ -69,6 +71,8 @@ public:
 	inline const uint8_t* get()   const {return data;}
 	inline       size_t   len()   const {return size;}
 
+	operator bool() const {return data;}
+
 	// Implicit conversion to const
 	operator ConstBytePtr() const {return {data, size};}
 private:
@@ -98,6 +102,8 @@ public:
 	inline       T* get()         {return data;}
 	inline const T* get()   const {return data;}
 	inline size_t   len()   const {return size;}
+
+	operator bool() const {return data;}
 
 	// Implicit conversion to const
 	operator ArrayPtr<const T>() const {return {data, size};}
