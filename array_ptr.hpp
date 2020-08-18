@@ -19,7 +19,7 @@ public:
 	// Size in bytes
 	ConstBytePtr(const void* t, size_t n) : data{static_cast<const uint8_t*>(t)}, size{n} {}
 
-	template<typename T> ConstBytePtr(ArrayPtr<T> ptr) : ConstBytePtr(ptr.get(), ptr.size() * sizeof(T)) {}
+	template<typename T> ConstBytePtr(ArrayPtr<T> ptr) : ConstBytePtr(ptr.data, ptr.size * sizeof(T)) {}
 
 	// Construct from array. Size is the size of the array
 	template<typename T, size_t N> ConstBytePtr(T(&t)[N]) : data{reinterpret_cast<const uint8_t*>(t)}, size{N * sizeof(T)} {}
@@ -50,7 +50,7 @@ public:
 	// Size in bytes
 	BytePtr(void* t, size_t n) : data{static_cast<uint8_t*>(t)}, size{n} {}
 
-	template<typename T> BytePtr(ArrayPtr<T> ptr) : BytePtr(ptr.get(), ptr.len() * sizeof(T)) {}
+	template<typename T> BytePtr(ArrayPtr<T> ptr) : BytePtr(ptr.data, ptr.size * sizeof(T)) {}
 
 	// Construct from array. Size is the size of the array
 	template<typename T, size_t N> BytePtr(T(&t)[N]) : data{reinterpret_cast<uint8_t*>(t)}, size{N * sizeof(T)} {}
