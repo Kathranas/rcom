@@ -101,9 +101,9 @@ public:
 	operator ArrayPtr<const T>() const {return {data, size};}
 };
 
-inline void zero(BytePtr dst)
+inline void zero(BytePtr dst, int val = 0)
 {
-	memset(dst.data, 0, dst.size);
+	memset(dst.data, val, dst.size);
 }
 
 inline void copy(BytePtr dst, ConstBytePtr src)
