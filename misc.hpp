@@ -17,6 +17,9 @@
 #define STRINGIFY(x) #x
 #define XSTRINGIFY(x) STRINGIFY(x)
 
+// Location as a string
+#define CODE_LOCATION "FILE: " __FILE__ " Line: " XSTRINGIFY(__LINE__)
+
 // Get size of array at compile time
 template<typename T, size_t N> inline constexpr size_t ARRAY_SIZE(T(&)[N]){return N;}
 
