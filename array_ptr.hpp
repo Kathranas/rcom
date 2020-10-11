@@ -8,9 +8,6 @@
 template<typename T> class ArrayPtr
 {
 public:
-	static_assert(std::is_object<T>(),    "T must be an object type");
-	static_assert(!std::is_abstract<T>(), "T must not be an abstract type");
-
 	inline ArrayPtr();
 	inline ArrayPtr(std::nullptr_t);
 	inline ArrayPtr(T* t, size_t n);
