@@ -26,7 +26,7 @@ public:
 	inline void    push_back(T&&);
 	inline void    pop_back();
 	inline size_t  count() const;
-protected:
+private:
 	T*     data_ptr;
 	size_t data_size;
 	size_t data_count;
