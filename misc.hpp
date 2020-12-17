@@ -4,21 +4,21 @@
 #include <cstdint>
 
 // Remove params
-#define EAT(...)
+#define RCOM_EAT(...)
 
 // Seperate params
-#define EXPAND(...) __VA_ARGS__
+#define RCOM_EXPAND(...) __VA_ARGS__
 
 // Combine params
-#define CONCAT_IMP(a, b) a ## b
-#define CONCAT(a, b) CONCAT_IMP(a, b)
+#define RCOM_CONCAT_IMP(a, b) a ## b
+#define RCOM_CONCAT(a, b) RCOM_CONCAT_IMP(a, b)
 
 // Make into string
-#define STRINGIFY(x) #x
-#define XSTRINGIFY(x) STRINGIFY(x)
+#define RCOM_STRINGIFY(x) #x
+#define RCOM_XSTRINGIFY(x) RCOM_STRINGIFY(x)
 
 // Location as a string
-#define CODE_LOCATION "FILE: " __FILE__ " Line: " XSTRINGIFY(__LINE__)
+#define RCOM_CODE_LOCATION "FILE: " __FILE__ " Line: " RCOM_XSTRINGIFY(__LINE__)
 
 // Get size of array at compile time
 template<typename T, size_t N> inline constexpr size_t ARRAY_SIZE(T(&)[N]){return N;}

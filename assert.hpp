@@ -1,31 +1,71 @@
 #pragma once
 
+#include "misc.hpp"
 #include <cstdio>
 #include <cstdlib>
 
-// Assert implementation
-namespace
+class AssertHandler
 {
-	inline void assert_imp(bool x, const char* msg, const char* file, int line)
+public:
+	virtual void run(const char* fmt, ...) = 0;
+};
+
+class DefaultAssertHandlerImp
+{
+public
+	inline virtual void run(const char* fmt, ...) override
 	{
-		if(!x)
-		{
-			// Log the failed assertion
-			fprintf(stderr, "Assert failed: %s\n file: %s\n line: %i\n", msg, file, line);
-	
-			// Crash
-			abort();
-		}
+		va_list argp;
+		va_start(argp, fmt);
+		vfprintf(stderr, fmt, argp);
+		va_end(argp);
+		fputc('\n', stderr);
+		abort();
 	}
-}
+};
+
+class AssertAssigner
+{
+public:
+	AssertAssigner(const AssertAssigner&)            = delete;
+	AssertAssigner(AssertAssigner&&)                 = delete;
+	AssertAssigner& operator=(const AssertAssigner&) = delete;
+	AssertAssigner& operator=(AssertAssigner&&)      = delete;
+
+	inline static AssertHandler* get_default()
+	{
+		return get().default_handler;
+	}
+	inline static void set_default(AssertHandler& handler)
+	{
+		get().default_handler = handler;
+	}
+	inline static void reset_default()
+	{
+		get().default_handler = &default_imp;
+	}
+private:
+	DefaultAssertHandlerImp default_imp;
+	AssertHandler* default_handler;
+
+	AssertAssigner() :
+		default_imp{},
+		default_handler{}
+	{
+		default_hander = &default_imp;
+	}
+
+	inline static AssertAssigner& get()
+	{
+		static AssertAssigner inst{};
+		return inst;
+	}
+};
+
+#define RCOM_ASSERT_MSG(msg) "Failed Assertion: " msg " at: " CODE_LOCATION
 
 #if defined(RCOM_ASSERTS_ENABLED)
-	// Make sure this condition is true
-	#define ASSERT_TRUE(x, msg) assert_imp((x), (msg), __FILE__, __LINE__)
-
-	// Make sure this condition is false
-	#define ASSERT_FALSE(x, msg) assert_imp(!(x), (msg), __FILE__, __LINE__)
+	#define RCOM_ASSERT(x, msg, ...) (x) ? ;AssertAssigner::get_default()->run(RCOM_ASSERT_MSG(msg), __VA_ARGS__)
 #else
-	#define ASSERT_TRUE(x, msg)
-	#define ASSERT_FALSE(x, msg)
+	#define RCOM_ASSERT(x, msg, ...)
 #endif
