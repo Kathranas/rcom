@@ -1,5 +1,7 @@
 #pragma once
 
+#include "misc.hpp"
+
 // Implementation of the defer macro
 namespace
 {
