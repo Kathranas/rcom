@@ -14,6 +14,9 @@ public:
 	inline           operator ArrayPtr<const T>() const;
 	inline           operator bool()        const;
 
+	inline           operator==(nullptr_t);
+	inline           operator!=(nullptr_t);
+
 	inline       T&  operator[](size_t i);
 	inline const T&  operator[](size_t i)   const;
 	inline       T*  begin();
@@ -49,6 +52,16 @@ template<typename T> ArrayPtr<T>::ArrayPtr(T* t, size_t n) :
 template<typename T> template<size_t N> inline ArrayPtr<T>::ArrayPtr(T(&t)[N]) :
 	ArrayPtr{t, N}
 {
+}
+
+template<typename T> ArrayPtr<T>::operator==(nullptr_t)
+{
+	return data;
+}
+
+template<typename T> ArrayPtr<T>::operator!=(nullptr_t)
+{
+	return !operator==(nullptr);
 }
 
 template<typename T> ArrayPtr<T>::operator ArrayPtr<const T>() const
