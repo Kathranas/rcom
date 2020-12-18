@@ -12,7 +12,7 @@ public:
 	inline ArrayPtr(T(&t)[N]);
 
 	inline           operator ArrayPtr<const T>() const;
-	inline           operator bool()        const;
+	inline           operator bool()              const;
 
 	inline           operator==(nullptr_t);
 	inline           operator!=(nullptr_t);
@@ -31,6 +31,8 @@ private:
 	T*     data_ptr;
 	size_t data_size;
 };
+
+typedef ArrayPtr<uint8_t> BytePtr;
 
 template<typename T> ArrayPtr<T>::ArrayPtr() :
 	data_ptr{nullptr},
