@@ -13,5 +13,5 @@ void rcom::die(const char* fmt, ...)
 	vfprintf(stderr, fmt, argp);
 	va_end(argp);
 	fputc('\n', stderr);
-	exit(EXIT_FAILURE);
+	abort();
 }
