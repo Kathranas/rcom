@@ -1,6 +1,6 @@
 #include "timer.hpp"
 
-Timer::Timer() :
+rcom::Timer::Timer() :
 	running{},
 	start_time{},
 	accumulator{},
@@ -9,7 +9,7 @@ Timer::Timer() :
 {
 }
 
-void Timer::reset()
+void rcom::Timer::reset()
 {
 	running         = {};
 	start_time      = {};
@@ -18,7 +18,7 @@ void Timer::reset()
 	lap_accumulator = {};
 }
 
-void Timer::start()
+void rcom::Timer::start()
 {
 	if(is_running())
 	{
@@ -28,7 +28,7 @@ void Timer::start()
 	start_time = Clock::now();
 }
 
-void Timer::stop()
+void rcom::Timer::stop()
 {
 	if(!is_running())
 	{
@@ -38,7 +38,7 @@ void Timer::stop()
 	accumulator += Clock::now() - start_time;
 }
 
-Timer::Duration Timer::lap()
+rcom::Timer::Duration rcom::Timer::lap()
 {
 	Duration lap_time = get_current_time();
 	accumulator       = {};
@@ -48,12 +48,12 @@ Timer::Duration Timer::lap()
 	return lap_time;
 }
 
-bool Timer::is_running() const
+bool rcom::Timer::is_running() const
 {
 	return start_time > 0;
 }
 
-Timer::Duration Timer::get_lap_time() const
+rcom::Timer::Duration rcom::Timer::get_lap_time() const
 {
 	if(is_running())
 	{
@@ -65,17 +65,17 @@ Timer::Duration Timer::get_lap_time() const
 	}
 }
 
-size_t Timer::get_lap_count() const
+size_t rcom::Timer::get_lap_count() const
 {
 	return lap_count;
 }
 
-Timer::Duration Timer::get_average_time() const
+rcom::Timer::Duration rcom::Timer::get_average_time() const
 {
 	return lap_accumulator / lap_count;
 }
 
-Timer::Duration Timer::get_total_time() const
+rcom::Timer::Duration rcom::Timer::get_total_time() const
 {
 	return lap_accumulator + get_current_time();
 }
