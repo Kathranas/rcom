@@ -1,4 +1,4 @@
-#include "array_ptr.hpp"
+#include "misc.hpp"
 
 template<typename T> class DynamicArray
 {
@@ -133,9 +133,4 @@ template<typename T> size_t& DynamicArray<T>::size()
 template<typename T> size_t  DynamicArray<T>::size() const
 {
 	return data_size;
-}
-
-template<typename T> inline ArrayPtr<T> to_ptr(DynamicArray<T> arr)
-{
-	return {arr.data(), arr.count()};
 }
