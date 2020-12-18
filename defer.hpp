@@ -2,8 +2,7 @@
 
 #include "misc.hpp"
 
-// Implementation of the defer macro
-namespace
+namespace rcom { namespace hidden
 {
 	// Use destructor to Call captured function at end of scope (Scope guard)
 	template<typename Func> struct DeferImp
@@ -20,10 +19,12 @@ namespace
 	{
 		return {f};
 	};
-}
+}}
+// namespace rcom::hidden
+
 // We generate a uniquly named DeferImp object, concatinating the line number
 // Then deduce the DeferImp template parameters using operator <<
 // Finally the exposed lamda captures the outside scope and is used as the block of code to be deferred
 
 // Call block of code at the end of scope
-#define RCOM_DEFER_TO_SCOPE auto RCOM_CONCAT(zz_defer_imp, __LINE__) = DeferTemp{} << [&]()
+#define RCOM_DEFER_TO_SCOPE auto RCOM_CONCAT(zz_defer_imp, __LINE__) = rcom::hidden::DeferTemp{} << [&]()
