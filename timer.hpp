@@ -14,7 +14,7 @@ public:
 	Duration lap();
 
 	bool     is_running()       const;
-	Duration get_lap_time() const;
+	Duration get_lap_time()     const;
 	size_t   get_lap_count()    const;
 	Duration get_average_time() const;
 	Duration get_total_time()   const;
