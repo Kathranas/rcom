@@ -2,6 +2,7 @@
 
 #include "array_ptr.hpp"
 #include "array.hpp"
+#include "dynamic_array.hpp"
 #include <type_traits>
 #include <cstring>
 
@@ -65,6 +66,11 @@ template<typename T, size_t N> ArrayPtr<T> to_ptr(Array<T, N>& arr)
 template<typename T, size_t N> ArrayPtr<const T> to_ptr(const Array<T, N>& arr)
 {
 	return {arr.data(), arr.size()};
+}
+
+template<typename T> inline ArrayPtr<T> to_ptr(DynamicArray<T> arr)
+{
+	return {arr.data(), arr.count()};
 }
 
 template<typename T> inline void zero(ArrayPtr<T> ptr, int val = 0)
