@@ -86,5 +86,10 @@ namespace rcom
 		static_assert(!std::is_const<T>(),  "Cannot copy to const array");
 		memcpy(dst.data(), src.data(), byte_size(src));
 	}
+
+	template<typename T, typename U> inline int compare(ArrayPtr<T> dst, ArrayPtr<U> src)
+	{
+		return memcmp(dst.data(), src.data(), byte_size(src));
+	}
 }
 // namespace::rcom
