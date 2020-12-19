@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cstddef> // For size_t
+#include "misc.hpp"
 
 namespace rcom
 {
@@ -16,8 +16,8 @@ namespace rcom
 		inline           operator ArrayPtr<const T>() const;
 		inline           operator bool()              const;
 	
-		inline           operator==(nullptr_t);
-		inline           operator!=(nullptr_t);
+		inline       bool operator==(nullptr_t);
+		inline       bool operator!=(nullptr_t);
 	
 		inline       T&  operator[](size_t i);
 		inline const T&  operator[](size_t i)   const;
@@ -58,12 +58,12 @@ namespace rcom
 	{
 	}
 	
-	template<typename T> ArrayPtr<T>::operator==(nullptr_t)
+	template<typename T> bool ArrayPtr<T>::operator==(nullptr_t)
 	{
 		return data;
 	}
 	
-	template<typename T> ArrayPtr<T>::operator!=(nullptr_t)
+	template<typename T> bool ArrayPtr<T>::operator!=(nullptr_t)
 	{
 		return !operator==(nullptr);
 	}
