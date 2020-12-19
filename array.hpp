@@ -19,7 +19,7 @@ namespace rcom
 		inline const T*  end()                  const;
 		inline       T*  data();
 		inline const T*  data()                 const;
-		inline constexpr size_t size() const;
+		inline constexpr size_t size()          const;
 	private:
 		T arr[N];
 	};
