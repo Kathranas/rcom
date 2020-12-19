@@ -23,19 +23,8 @@ namespace rcom
 		inline const T*  data()                 const;
 		inline size_t&   size();
 		inline size_t    size()                 const;
-	
-		inline void    push_back(const T&);
-		inline void    push_back(T&&);
-		inline void    pop_back();
-
-		// Insert by moving other elements
-		inline void    insert_move_others(const T&, size_t index);
-		inline void    insert_move_others(T&&, size_t index);
-
-		// Insert by swapping with the end
-		inline void    insert_swap_end(const T&, size_t index);
-		inline void    insert_swap_end(T&&, size_t index);
-		inline size_t  count() const;
+		inline size_t&   count();
+		inline size_t    count()                const;
 	private:
 		T*     data_ptr;
 		size_t data_size;
@@ -71,53 +60,10 @@ namespace rcom
 	{
 		return data_ptr;
 	}
-	
-	template<typename T> void DynamicArray<T>::push_back(const T& t)
-	{
-		data_ptr[data_count++] = t;
-	}
-	
-	template<typename T> void DynamicArray<T>::push_back(T&& t)
-	{
-		data_ptr[data_count++] = std::move(t);
-	}
-	
-	template<typename T> void DynamicArray<T>::pop_back()
-	{
-		if(count > 0)
-		{
-			count--;
-		}
-	}
 
-	template<typename T> void DynamicArray<T>::insert_move_others(const T& t, size_t index)
+	template<typename T> size_t& DynamicArray<T>::count()
 	{
-		T* src = &data_ptr[index];
-		T* dst = p1++;
-		memmove(dst, src, data_count - index);
-		*src = t;
-		data_count++;
-	}
-
-	template<typename T> void DynamicArray<T>::insert_move_others(T&& t, size_t index)
-	{
-		T* src = &data_ptr[index];
-		T* dst = p1++;
-		memmove(dst, src, data_count - index);
-		*src = std::move(t);
-		data_count++;
-	}
-
-	template<typename T> void DynamicArray<T>::insert_swap_end(const T& t, size_t index)
-	{
-		std::swap(data_ptr[index], data_ptr[count-1]);
-		data_ptr[index] = t;
-	}
-
-	template<typename T> void DynamicArray<T>::insert_swap_end(T&& t, size_t index)
-	{
-		std::swap(data_ptr[index], data_ptr[count-1]);
-		data_ptr[index] = std::move(t);
+		return data_count;
 	}
 	
 	template<typename T> size_t DynamicArray<T>::count() const
