@@ -9,7 +9,8 @@ namespace rcom
 	public:
 		inline Array() = default;
 		inline constexpr Array(T(&)[N]);
-		inline constexpr Array(std::initializer_list<T>);
+
+		template<typename... Ts> inline constexpr Array(Ts... ts);
 	
 		inline       T&  operator[](size_t i);
 		inline const T&  operator[](size_t i)   const;
@@ -29,10 +30,10 @@ namespace rcom
 	{
 	}
 	
-	template<typename T, size_t N> constexpr Array<T, N>::Array(std::initializer_list<T> temp)
-		: arr{temp}
-	{
-	}
+//	template<typename T, size_t N> constexpr Array<T, N>::Array(std::initializer_list<T> temp)
+//		: arr{temp}
+//	{
+//	}
 	
 	template<typename T, size_t N> T& Array<T, N>::operator[](size_t i)
 	{
@@ -46,37 +47,43 @@ namespace rcom
 	
 	template<typename T, size_t N> T* Array<T, N>::begin()
 	{
-		return arr;
+		return &arr[0];
 	}
 	
 	template<typename T, size_t N> const T* Array<T, N>::begin() const
 	{
-		return arr;
+		return &arr[0];
 	}
 	
 	template<typename T, size_t N> T* Array<T, N>::end()
 	{
-		return arr[N-1];
+		return &arr[N];
 	}
 	
 	template<typename T, size_t N> const T* Array<T, N>::end() const
 	{
-		return arr[N-1];
+		return &arr[N];
 	}
 	
 	template<typename T, size_t N> const T* Array<T, N>::data() const
 	{
-		return arr;
+		return &arr[0];
 	}
 	
 	template<typename T, size_t N> T* Array<T, N>::data()
 	{
-		return arr;
+		return &arr[0];
 	}
 	
 	template<typename T, size_t N> constexpr size_t Array<T, N>::size() const
 	{
 		return N;
+	}
+
+
+	template<typename T, size_t N> template<typename... Ts> constexpr Array<T, N>::Array(Ts... ts) :
+		arr{ts...}
+	{
 	}
 }
 // namespace::rcom

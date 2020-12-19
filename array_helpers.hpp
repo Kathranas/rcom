@@ -91,5 +91,10 @@ namespace rcom
 	{
 		return memcmp(dst.data(), src.data(), byte_size(src));
 	}
+
+	template<typename T, typename... Ts> Array<T, sizeof...(Ts)> make_array(Ts... ts)
+	{
+		return {ts...};
+	}
 }
 // namespace::rcom
