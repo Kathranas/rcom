@@ -8,7 +8,7 @@ namespace rcom
 	{
 	public:
 		inline ArrayPtr();
-		inline ArrayPtr(nullptr_t);
+		inline ArrayPtr(std::nullptr_t);
 		inline ArrayPtr(T* t, size_t n);
 		template<size_t N>
 		inline ArrayPtr(T(&t)[N]);
@@ -16,8 +16,8 @@ namespace rcom
 		inline           operator ArrayPtr<const T>() const;
 		inline           operator bool()              const;
 	
-		inline       bool operator==(nullptr_t);
-		inline       bool operator!=(nullptr_t);
+		inline       bool operator==(std::nullptr_t);
+		inline       bool operator!=(std::nullptr_t);
 	
 		inline       T&  operator[](size_t i);
 		inline const T&  operator[](size_t i)   const;
@@ -42,7 +42,7 @@ namespace rcom
 	{
 	}
 	
-	template<typename T> ArrayPtr<T>::ArrayPtr(nullptr_t) :
+	template<typename T> ArrayPtr<T>::ArrayPtr(std::nullptr_t) :
 		ArrayPtr{}
 	{
 	}
@@ -58,12 +58,12 @@ namespace rcom
 	{
 	}
 	
-	template<typename T> bool ArrayPtr<T>::operator==(nullptr_t)
+	template<typename T> bool ArrayPtr<T>::operator==(std::nullptr_t)
 	{
 		return data;
 	}
 	
-	template<typename T> bool ArrayPtr<T>::operator!=(nullptr_t)
+	template<typename T> bool ArrayPtr<T>::operator!=(std::nullptr_t)
 	{
 		return !operator==(nullptr);
 	}
