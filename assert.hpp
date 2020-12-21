@@ -70,7 +70,7 @@ namespace rcom
 }
 // namespace::rcom
 
-#define RCOM_ASSERT_MSG(msg) "Failed Assertion: " msg " at: " CODE_LOCATION
+#define RCOM_ASSERT_MSG(msg) "Failed Assertion: " msg " at: " RCOM_CODE_LOCATION
 
 #if defined(RCOM_ASSERTS_ENABLED)
 	#define RCOM_ASSERT(x, msg, ...) (x) ? ;rcom::AssertAssigner::get_default()->run(RCOM_ASSERT_MSG(msg), __VA_ARGS__)
