@@ -3,6 +3,7 @@
 #include "misc.hpp"
 #include <cstdio>
 #include <cstdlib>
+#include <cstdarg>
 
 namespace rcom
 {
@@ -12,9 +13,9 @@ namespace rcom
 		virtual void run(const char* fmt, ...) = 0;
 	};
 	
-	class DefaultAssertHandlerImp
+	class DefaultAssertHandlerImp : public AssertHandler
 	{
-	public
+	public:
 		inline virtual void run(const char* fmt, ...) override
 		{
 			va_list argp;
@@ -41,26 +42,27 @@ namespace rcom
 		}
 		inline static void set_default(AssertHandler& handler)
 		{
-			get().default_handler = handler;
+			get().default_handler = &handler;
 		}
 		inline static void reset_default()
 		{
-			get().default_handler = &default_imp;
+			auto& self = get();
+			self.default_handler = &self.default_imp;
 		}
 	private:
 		DefaultAssertHandlerImp default_imp;
 		AssertHandler* default_handler;
 	
-		AssertAssigner() :
+		AssertTable() :
 			default_imp{},
 			default_handler{}
 		{
-			default_hander = &default_imp;
+			default_handler = &default_imp;
 		}
 	
-		inline static AssertAssigner& get()
+		inline static AssertTable& get()
 		{
-			static AssertAssigner inst{};
+			static AssertTable inst{};
 			return inst;
 		}
 	};
