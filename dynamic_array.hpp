@@ -1,3 +1,5 @@
+#pragma once
+
 #include "misc.hpp"
 
 namespace rcom
@@ -7,9 +9,9 @@ namespace rcom
 	public:
 		inline DynamicArray();
 		inline DynamicArray(std::nullptr_t);
-		inline DynamicArray(T* t, size_t n, size_t c = 0);
+		inline DynamicArray(T* ptr, size_t size, size_t count = 0);
 		template<size_t N>
-		inline DynamicArray(T(&t)[N], size_t c = 0);
+		inline DynamicArray(T(&arr)[N], size_t count = 0);
 		inline operator DynamicArray<const T>() const;
 		inline operator bool()                  const;
 	
@@ -26,9 +28,14 @@ namespace rcom
 		inline size_t&   count();
 		inline size_t    count()                const;
 	private:
-		T*     data_ptr;
-		size_t data_size;
-		size_t data_count;
+		// Pointer to array
+		T*     ptr;
+
+		// Physical Size / Capacity
+		size_t len;
+
+		// Logical size / Number of elements
+		size_t num;
 	};
 	
 	template<typename T> DynamicArray<T>::DynamicArray()
@@ -36,89 +43,90 @@ namespace rcom
 	{
 	}
 	
-	template<typename T> DynamicArray<T>::DynamicArray(std::nullptr_t) 
-		: data_ptr{nullptr}, data_size{0}, data_count{0}
+	template<typename T> DynamicArray<T>::DynamicArray(std::nullptr_t)
+		: ptr{nullptr}, len{0}, num{0}
 	{
 	}
 	
-	template<typename T> DynamicArray<T>::DynamicArray(T* t, size_t n, size_t c) 
-		: data_ptr{t}, data_size{n}, data_count{c}
+	template<typename T> DynamicArray<T>::DynamicArray(T* p, size_t size, size_t count)
+		: ptr{p}, len{size}, num{count}
 	{
 	}
 	
-	template<typename T> template<size_t N> DynamicArray<T>::DynamicArray(T(&t)[N], size_t c) 
-		: DynamicArray{t, N, c}
+	template<typename T> template<size_t N> DynamicArray<T>::DynamicArray(T(&arr)[N], size_t count)
+		: DynamicArray{arr, N, count}
 	{
 	}
 	
 	template<typename T> DynamicArray<T>::operator DynamicArray<const T>() const
 	{
-		return {data_ptr, data_size, data_count};
+		return {ptr, len, count};
 	}
 	
 	template<typename T> DynamicArray<T>::operator bool() const
 	{
-		return data_ptr;
+		return ptr;
 	}
 
 	template<typename T> size_t& DynamicArray<T>::count()
 	{
-		return data_count;
+		return num;
 	}
 	
 	template<typename T> size_t DynamicArray<T>::count() const
 	{
-		return data_count;
+		return num;
 	}
 	
 	template<typename T> T& DynamicArray<T>::operator[](size_t i)
 	{
-		return data_ptr[i];
+		return ptr[i];
 	}
 	
 	template<typename T> const T& DynamicArray<T>::operator[](size_t i) const
 	{
-		return data_ptr[i];
+		return ptr[i];
 	}
 	 
 	template<typename T> T* DynamicArray<T>::begin()
 	{
-		return data_ptr;
+		return ptr;
 	}
 	
-	template<typename T> const T* DynamicArray<T>::begin() const 
+	template<typename T> const T* DynamicArray<T>::begin() const
 	{
-		return data_ptr;
+		return ptr;
 	}
 	
 	template<typename T> T* DynamicArray<T>::end()
 	{
-		return data_ptr + data_count;
+		// End of logical array rather than end of capacity
+		return &ptr[num];
 	}
 	
 	template<typename T> const T* DynamicArray<T>::end() const
 	{
-		return data_ptr + data_count;
+		return &ptr[num];
 	}
 	
 	template<typename T> T*& DynamicArray<T>::data()
 	{
-		return data_ptr;
+		return ptr;
 	}
 	
 	template<typename T> const T* DynamicArray<T>::data() const
 	{
-		return data_ptr;
+		return ptr;
 	}
 	
 	template<typename T> size_t& DynamicArray<T>::size()
 	{
-		return data_size;
+		return len;
 	}
 	
 	template<typename T> size_t  DynamicArray<T>::size() const
 	{
-		return data_size;
+		return len;
 	}
 }
 // namespace rcom
