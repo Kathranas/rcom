@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cstdint>
+#include "fundamental.hpp"
 
 // Remove params
 #define RCOM_EAT(...)
