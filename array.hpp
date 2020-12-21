@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fundamental.hpp"
+#include "assert.hpp"
 
 namespace rcom
 {
@@ -20,7 +21,7 @@ namespace rcom
 		inline const T*  end()                  const;
 		inline       T*  data();
 		inline const T*  data()                 const;
-		inline constexpr size_t size()          const;
+		inline static constexpr size_t size();
 	private:
 		T arr[N];
 	};
@@ -70,11 +71,10 @@ namespace rcom
 		return &arr[0];
 	}
 	
-	template<typename T, size_t N> constexpr size_t Array<T, N>::size() const
+	template<typename T, size_t N> constexpr size_t Array<T, N>::size()
 	{
 		return N;
 	}
-
 
 	template<typename T, size_t N> template<typename... Ts> constexpr Array<T, N>::Array(Ts... ts) :
 		arr{ts...}
