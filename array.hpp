@@ -33,11 +33,13 @@ namespace rcom
 	
 	template<typename T, size_t N> T& Array<T, N>::operator[](size_t i)
 	{
+		RCOM_ASSERT(i < size(), "Index out of range");
 		return arr[i];
 	}
 	
 	template<typename T, size_t N> const T& Array<T, N>::operator[](size_t i) const
 	{
+		RCOM_ASSERT(i < size(), "Index out of range");
 		return arr[i];
 	}
 	
