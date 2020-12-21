@@ -1,6 +1,7 @@
 #pragma once
 
 #include "misc.hpp"
+#include "assert.hpp"
 
 namespace rcom
 {
@@ -80,11 +81,13 @@ namespace rcom
 	
 	template<typename T> T& DynamicArray<T>::operator[](size_t i)
 	{
+		RCOM_ASSERT(i < count(), "Index out of range");
 		return ptr[i];
 	}
 	
 	template<typename T> const T& DynamicArray<T>::operator[](size_t i) const
 	{
+		RCOM_ASSERT(i < count(), "Index out of range");
 		return ptr[i];
 	}
 	 
