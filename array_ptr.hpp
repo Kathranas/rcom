@@ -28,15 +28,15 @@ namespace rcom
 		inline size_t&   size();
 		inline size_t    size()                 const;
 	private:
-		T*     data_ptr;
-		size_t data_size;
+		T*     ptr;
+		size_t len;
 	};
 	
 	typedef ArrayPtr<uint8_t> BytePtr;
 	
 	template<typename T> ArrayPtr<T>::ArrayPtr() :
-		data_ptr{nullptr},
-		data_size{0}
+		ptr{nullptr},
+		len{0}
 	{
 	}
 	
@@ -46,8 +46,8 @@ namespace rcom
 	}
 	
 	template<typename T> ArrayPtr<T>::ArrayPtr(T* t, size_t n) :
-		data_ptr{t},
-		data_size{n}
+		ptr{t},
+		len{n}
 	{
 	}
 	
@@ -58,64 +58,64 @@ namespace rcom
 	
 	template<typename T> ArrayPtr<T>::operator ArrayPtr<const T>() const
 	{
-		return {data_ptr, data_size};
+		return {ptr, len};
 	}
 	
 	template<typename T> T& ArrayPtr<T>::operator[](size_t i)
 	{
 		RCOM_ASSERT(i < size(), "Index out of range");
-		return data_ptr[i];
+		return ptr[i];
 	}
 	
 	template<typename T> const T& ArrayPtr<T>::operator[](size_t i) const
 	{
 		RCOM_ASSERT(i < size(), "Index out of range");
-		return data_ptr[i];
+		return ptr[i];
 	}
 	
 	template<typename T> T* ArrayPtr<T>::begin()
 	{
-		return data_ptr;
+		return ptr;
 	}
 	
 	template<typename T> const T* ArrayPtr<T>::begin() const
 	{
-		return data_ptr;
+		return ptr;
 	}
 	
 	template<typename T> T* ArrayPtr<T>::end()
 	{
-		return data_ptr + data_size;
+		return &ptr[len];
 	}
 	
 	template<typename T> const T* ArrayPtr<T>::end() const
 	{
-		return data_ptr + data_size;
+		return &ptr[len];
 	}
 	
 	template<typename T> ArrayPtr<T>::operator bool() const
 	{
-		return data_ptr;
+		return ptr;
 	}
 	
 	template<typename T> T*& ArrayPtr<T>::data()
 	{
-		return data_ptr;
+		return ptr;
 	}
 	
 	template<typename T> const T* ArrayPtr<T>::data() const
 	{
-		return data_ptr;
+		return ptr;
 	}
 	
 	template<typename T> size_t& ArrayPtr<T>::size()
 	{
-		return data_size;
+		return len;
 	}
 	
 	template<typename T> size_t  ArrayPtr<T>::size() const
 	{
-		return data_size;
+		return len;
 	}
 
 	// Helper functions
