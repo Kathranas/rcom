@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fundamental.hpp"
+#include "assert.hpp"
 
 namespace rcom
 {
@@ -62,14 +63,16 @@ namespace rcom
 	
 	template<typename T> T& ArrayPtr<T>::operator[](size_t i)
 	{
+		RCOM_ASSERT(i < size(), "Index out of range");
 		return data_ptr[i];
 	}
 	
 	template<typename T> const T& ArrayPtr<T>::operator[](size_t i) const
 	{
+		RCOM_ASSERT(i < size(), "Index out of range");
 		return data_ptr[i];
 	}
-	 
+	
 	template<typename T> T* ArrayPtr<T>::begin()
 	{
 		return data_ptr;
