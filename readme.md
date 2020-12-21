@@ -1,15 +1,15 @@
-### Person library code
+## RCOM -> My personal library code
 
-## Philosophy
+### Philosophy
 The idea is to have small simple lightweight classes.
 These improve on C code by guarding internal state without becoming too bloated as C++ often does.
 Additional functionality should be provided by helper functions.
 Simple objects can be used as building blocks for more complicated objects, although I don't reccomend inheritance in all cases.
 
-## rcom::Array
+### rcom::Array
 Array is a lightweight wrapper around a C-array which provides bounds checking.
 
-## rcom::ArrayPtr
+### rcom::ArrayPtr
 ArrayPtr is a pointer to an array.
 In C an array frequently decays into a pointer losing size information.
 ArrayPtr retains this size information and has bounds checking.
@@ -32,6 +32,6 @@ A: ArrayPtr is a simple object rather like C-pointer, simpicity is the philosoph
 Any of the types here can be extended to with raii & ownership symantics.
 For example UniqueArrayPtr and SharedArrayPtr.
 
-## rcom::DynamicArray
+### rcom::DynamicArray
 DynamicArray is an ArrayPtr-like implementation of the classic CS data structure.
 Has counted logical size which is less than or equal to the overall capacity of the underlying array.
