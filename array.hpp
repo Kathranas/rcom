@@ -30,11 +30,6 @@ namespace rcom
 	{
 	}
 	
-//	template<typename T, size_t N> constexpr Array<T, N>::Array(std::initializer_list<T> temp)
-//		: arr{temp}
-//	{
-//	}
-	
 	template<typename T, size_t N> T& Array<T, N>::operator[](size_t i)
 	{
 		return arr[i];
