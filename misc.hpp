@@ -18,19 +18,3 @@
 
 // Location as a string
 #define RCOM_CODE_LOCATION "FILE: " __FILE__ " Line: " RCOM_XSTRINGIFY(__LINE__)
-
-namespace rcom
-{
-	// Get size of array at compile time
-	template<typename T, size_t N> constexpr size_t array_size(T(&)[N])
-	{
-		return N;
-	}
-	
-	// String comparison
-	bool strequal(const char* s1, const char* s2);
-	
-	// Quit with error message
-	void die(const char* fmt, ...);
-}
-// namespace rcom
