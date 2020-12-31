@@ -5,12 +5,13 @@
 
 namespace rcom
 {
-	template<typename T, size_t N> class Array
+	// Multidimensional array
+	template<typename T, size_t N, size_t... NS> class Array;
+
+	template<typename T, size_t N> class Array<T, N>
 	{
 	public:
 		inline Array() = default;
-		inline constexpr Array(T(&)[N]);
-
 		template<typename... Ts> inline constexpr Array(Ts... ts);
 	
 		inline       T&  operator[](size_t i);
@@ -22,14 +23,13 @@ namespace rcom
 		inline       T*  data();
 		inline const T*  data()                 const;
 		inline static constexpr size_t size();
+
+		// Multidimensional
+		inline static constexpr size_t flat_size();
+		inline static constexpr size_t sub_array_count();
 	private:
 		T arr[N];
 	};
-	
-	template<typename T, size_t N> constexpr Array<T, N>::Array(T(&t)[N])
-		: arr{t}
-	{
-	}
 	
 	template<typename T, size_t N> T& Array<T, N>::operator[](size_t i)
 	{
@@ -78,9 +78,92 @@ namespace rcom
 		return N;
 	}
 
+	template<typename T, size_t N> constexpr size_t Array<T, N>::flat_size()
+	{
+		return size();
+	}
+
 	template<typename T, size_t N> template<typename... Ts> constexpr Array<T, N>::Array(Ts... ts) :
 		arr{ts...}
 	{
+	}
+
+	// Multidimensional array
+	template<typename T, size_t N, size_t... NS> class Array
+	{
+	public:
+		typedef Array<T, NS...> ArrayType;
+
+		inline Array() = default;
+		template<typename... Ts> inline constexpr Array(Ts... ts);
+	
+		inline       ArrayType&        operator[](size_t i);
+		inline const ArrayType&        operator[](size_t i)   const;
+		inline       ArrayType*        begin();
+		inline const ArrayType*        begin()                const;
+		inline       ArrayType*        end();
+		inline const ArrayType*        end()                  const;
+		inline       ArrayType*        data();
+		inline const ArrayType*        data()                 const;
+
+		// Multidimensional
+		inline static constexpr size_t size();
+		inline static constexpr size_t flat_size();
+		inline static constexpr size_t sub_array_count();
+	private:
+		Array<ArrayType, N> arr;
+	};
+
+	template<typename T, size_t N, size_t... NS> template<typename... Ts> constexpr Array<T, N, NS...>::Array(Ts... ts) :
+		arr{ts...}
+	{
+	}
+
+	template<typename T, size_t N, size_t... NS> auto Array<T, N, NS...>::operator[](size_t i) -> ArrayType&
+	{
+		RCOM_ASSERT(i < size(), "Index out of range");
+		return arr[i];
+	}
+
+	template<typename T, size_t N, size_t... NS> auto Array<T, N, NS...>::operator[](size_t i) const -> const ArrayType&
+	{
+		RCOM_ASSERT(i < size(), "Index out of range");
+		return arr[i];
+	}
+
+	template<typename T, size_t N, size_t... NS> auto Array<T, N, NS...>::begin() -> ArrayType*
+	{
+		return &arr[0];
+	}
+
+	template<typename T, size_t N, size_t... NS> auto Array<T, N, NS...>::begin() const -> const ArrayType*
+	{
+		return &arr[0];
+	}
+
+	template<typename T, size_t N, size_t... NS> auto Array<T, N, NS...>::end() -> ArrayType*
+	{
+		return &arr[N];
+	}
+
+	template<typename T, size_t N, size_t... NS> auto Array<T, N, NS...>::end() const -> const ArrayType*
+	{
+		return &arr[N];
+	}
+
+	template<typename T, size_t N, size_t... NS> constexpr size_t Array<T, N, NS...>::size()
+	{
+		return N;
+	}
+
+	template<typename T, size_t N, size_t... NS> constexpr size_t Array<T, N, NS...>::flat_size()
+	{
+		return N * ArrayType::flat_size();
+	}
+
+	template<typename T, size_t N, size_t... NS> constexpr size_t Array<T, N, NS...>::sub_array_count()
+	{
+		return sizeof...(NS);
 	}
 }
 // namespace::rcom
