@@ -102,20 +102,5 @@ namespace rcom
 	{
 		return memcmp(dst.data(), src.data(), byte_size(src));
 	}
-
-	template<typename T, typename... Ts> auto make_array(Ts&&... ts)
-	{
-		return rcom::Array<T, sizeof...(ts)>(ts...);
-	}
-	
-	template<typename T, typename... Ts> auto make_dynamic_array(Ts&&... ts)
-	{
-		return rcom::DynamicArray<T, sizeof...(Ts)>{ts...};
-	}
-	
-	template<typename T, size_t N, typename... Ts> auto make_dynamic_array(Ts&&... ts)
-	{
-		return rcom::DynamicArray<T, N>(ts...);
-	}
 }
 // namespace::rcom

@@ -167,5 +167,10 @@ namespace rcom
 	{
 		return sizeof...(NS);
 	}
+
+	template<typename T, typename... Ts> auto make_array(Ts&&... ts)
+	{
+		return rcom::Array<T, sizeof...(ts)>(ts...);
+	}
 }
 // namespace::rcom

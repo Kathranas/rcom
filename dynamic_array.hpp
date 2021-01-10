@@ -96,5 +96,15 @@ namespace rcom
 	{
 		return N;
 	}
+
+	template<typename T, typename... Ts> auto make_dynamic_array(Ts&&... ts)
+	{
+		return rcom::DynamicArray<T, sizeof...(Ts)>{ts...};
+	}
+	
+	template<typename T, size_t N, typename... Ts> auto make_dynamic_array(Ts&&... ts)
+	{
+		return rcom::DynamicArray<T, N>(ts...);
+	}
 }
 // namespace rcom
