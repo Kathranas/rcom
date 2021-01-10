@@ -2,6 +2,7 @@
 
 #include "fundamental.hpp"
 #include "assert.hpp"
+#include <initializer_list>
 
 namespace rcom
 {
@@ -11,8 +12,7 @@ namespace rcom
 	template<typename T, size_t N> class Array<T, N>
 	{
 	public:
-		inline Array() = default;
-		template<typename... Ts> inline constexpr Array(Ts... ts);
+		template<typename... Ts> inline constexpr Array(Ts&&...);
 	
 		inline       T&  operator[](size_t i);
 		inline const T&  operator[](size_t i)   const;
@@ -27,9 +27,15 @@ namespace rcom
 		// Multidimensional
 		inline static constexpr size_t flat_size();
 		inline static constexpr size_t sub_array_count();
+
 	private:
 		T arr[N];
 	};
+
+	template<typename T, size_t N> template<typename... Ts> constexpr Array<T, N>::Array(Ts&&... ts) :
+		arr{ts...}
+	{
+	}
 	
 	template<typename T, size_t N> T& Array<T, N>::operator[](size_t i)
 	{
@@ -83,19 +89,14 @@ namespace rcom
 		return size();
 	}
 
-	template<typename T, size_t N> template<typename... Ts> constexpr Array<T, N>::Array(Ts... ts) :
-		arr{ts...}
-	{
-	}
-
 	// Multidimensional array
 	template<typename T, size_t N, size_t... NS> class Array
 	{
 	public:
+		// Must be public for aggrigate initilisation
 		typedef Array<T, NS...> ArrayType;
 
-		inline Array() = default;
-		template<typename... Ts> inline constexpr Array(Ts... ts);
+		inline constexpr Array(std::initializer_list<T>);
 	
 		inline       ArrayType&        operator[](size_t i);
 		inline const ArrayType&        operator[](size_t i)   const;
@@ -114,8 +115,9 @@ namespace rcom
 		Array<ArrayType, N> arr;
 	};
 
-	template<typename T, size_t N, size_t... NS> template<typename... Ts> constexpr Array<T, N, NS...>::Array(Ts... ts) :
-		arr{ts...}
+
+	template<typename T, size_t N, size_t... NS> constexpr Array<T, N, NS...>::Array(std::initializer_list<T> init) :
+		arr{init}
 	{
 	}
 
