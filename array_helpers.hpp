@@ -5,9 +5,20 @@
 #include "dynamic_array.hpp"
 #include <type_traits>
 #include <cstring>
+#include <type_traits>
 
 namespace rcom
 {
+	template<typename T, typename... Ts> constexpr Array<std::decay_t<T>, 1 + sizeof... (Ts)> make_array(T&& t, Ts&&... ts) noexcept(noexcept(std::is_nothrow_constructible<Array<std::decay_t<T>, 1 + sizeof... (Ts)>, T&&, Ts&&...>::value))
+	{
+	    return {{std::forward<T>(t), std::forward<Ts>(ts)...}};
+	}
+	
+	template<typename T> constexpr Array<std::decay<T>, 0> make_array() noexcept
+	{
+	    return {};
+	}
+
 	template<typename T> T& get_first(ArrayPtr<T> ptr)
 	{
 		return *ptr.begin();
@@ -70,10 +81,10 @@ namespace rcom
 		return {arr.data(), arr.size()};
 	}
 	
-	template<typename T> inline ArrayPtr<T> to_ptr(DynamicArray<T> arr)
-	{
-		return {arr.data(), arr.count()};
-	}
+//	template<typename T> inline ArrayPtr<T> to_ptr(DynamicArray<T> arr)
+//	{
+//		return {arr.data(), arr.count()};
+//	}
 	
 	template<typename T> inline void zero(ArrayPtr<T> ptr, int val = 0)
 	{
@@ -92,9 +103,19 @@ namespace rcom
 		return memcmp(dst.data(), src.data(), byte_size(src));
 	}
 
-	template<typename T, typename... Ts> Array<T, sizeof...(Ts)> make_array(Ts... ts)
+	template<typename T, typename... Ts> auto make_array(Ts&&... ts)
 	{
-		return {ts...};
+		return rcom::Array<T, sizeof...(ts)>(ts...);
+	}
+	
+	template<typename T, typename... Ts> auto make_dynamic_array(Ts&&... ts)
+	{
+		return rcom::DynamicArray<T, sizeof...(Ts)>{ts...};
+	}
+	
+	template<typename T, size_t N, typename... Ts> auto make_dynamic_array(Ts&&... ts)
+	{
+		return rcom::DynamicArray<T, N>(ts...);
 	}
 }
 // namespace::rcom
