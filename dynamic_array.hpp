@@ -2,8 +2,6 @@
 
 #include "fundamental.hpp"
 #include "assert.hpp"
-#include <initializer_list>
-#include <algorithm>
 
 namespace rcom
 {
