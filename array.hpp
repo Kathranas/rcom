@@ -2,6 +2,7 @@
 
 #include "fundamental.hpp"
 #include "assert.hpp"
+#include "array_ptr.hpp"
 #include <initializer_list>
 
 namespace rcom
@@ -20,6 +21,12 @@ namespace rcom
 		Array& operator=(const Array&) = default;
 		Array& operator=(Array&&)      = default;
 		~Array()                       = default;
+
+		// ArrayPtr Conversion
+		inline operator ArrayPtr<T>();
+		inline operator ArrayPtr<const T>() const;
+		inline ArrayPtr<T>       to_ptr();
+		inline ArrayPtr<const T> to_ptr() const;
 	
 		inline       T&  operator[](size_t i);
 		inline const T&  operator[](size_t i)   const;
@@ -38,6 +45,26 @@ namespace rcom
 
 #define RCOM_MAKE_ARRAY(NAME, TYPE, ...)  rcom::Array<TYPE, std::initializer_list<TYPE>__VA_ARGS__.size()> NAME{__VA_ARGS__}
 #define RCOM_FROM_STRING(NAME, TYPE, ARR) rcom::Array<TYPE, (sizeof(ARR) / sizeof(*ARR))> NAME{ARR}
+
+	template<typename T, size_t N> ArrayPtr<T> Array<T, N>::to_ptr()
+	{
+		return {data(), N};
+	}
+
+	template<typename T, size_t N> ArrayPtr<const T> Array<T, N>::to_ptr() const
+	{
+		return {data(), N};
+	}
+
+	template<typename T, size_t N> Array<T, N>::operator ArrayPtr<T>()
+	{
+		return to_ptr();
+	}
+
+	template<typename T, size_t N> Array<T, N>::operator ArrayPtr<const T>() const
+	{
+		return to_ptr();
+	}
 	
 	template<typename T, size_t N> T& Array<T, N>::operator[](size_t i)
 	{
@@ -106,6 +133,12 @@ namespace rcom
 		Array& operator=(Array&&)      = default;
 		~Array()                       = default;
 
+		// ArrayPtr conversion
+		inline operator ArrayPtr<ArrayType>();
+		inline operator ArrayPtr<const ArrayType>() const;
+		inline ArrayPtr<ArrayType>       to_ptr();
+		inline ArrayPtr<const ArrayType> to_ptr() const;
+
 		inline       ArrayType& operator[](size_t i);
 		inline const ArrayType& operator[](size_t i)  const;
 		inline       ArrayType* begin();
@@ -120,6 +153,26 @@ namespace rcom
 		inline static constexpr size_t flat_size();
 		inline static constexpr size_t sub_array_count();
 	};
+
+	template<typename T, size_t N, size_t... NS> auto Array<T, N, NS...>::to_ptr()       -> ArrayPtr<ArrayType>
+	{
+		return {data(), N};
+	}
+
+	template<typename T, size_t N, size_t... NS> auto Array<T, N, NS...>::to_ptr() const -> ArrayPtr<const ArrayType>
+	{
+		return {data(), N};
+	}
+
+	template<typename T, size_t N, size_t... NS> Array<T, N, NS...>::operator ArrayPtr<ArrayType>()
+	{
+		return to_ptr();
+	}
+
+	template<typename T, size_t N, size_t... NS> Array<T, N, NS...>::operator ArrayPtr<const ArrayType>() const
+	{
+		return to_ptr();
+	}
 
 	template<typename T, size_t N, size_t... NS> auto Array<T, N, NS...>::operator[](size_t i) -> ArrayType&
 	{

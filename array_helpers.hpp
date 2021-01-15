@@ -1,9 +1,6 @@
 #pragma once
 
 #include "array_ptr.hpp"
-#include "array.hpp"
-#include "dynamic_array.hpp"
-#include <type_traits>
 #include <cstring>
 
 namespace rcom
@@ -35,11 +32,6 @@ namespace rcom
 		return ptr.size() * sizeof(T);
 	}
 	
-	template<typename T> ArrayPtr<T> to_ptr(ArrayPtr<T> ptr)
-	{
-	    return ptr;
-	}
-	
 	template<typename T> ArrayPtr<T> to_ptr(T* ptr, size_t n)
 	{
 		return {ptr, n};
@@ -50,40 +42,13 @@ namespace rcom
 	    return {arr};
 	}
 	
-	template<typename T> ArrayPtr<typename T::value_type> to_ptr(T& t)
-	{
-	    return {t};
-	}
-	
-	template<typename T> ArrayPtr<const typename T::value_type> to_ptr(const T& t)
-	{
-	    return {t};
-	}
-	
-	template<typename T, size_t N> ArrayPtr<T> to_ptr(Array<T, N>& arr)
-	{
-		return {arr.data(), arr.size()};
-	}
-	
-	template<typename T, size_t N> ArrayPtr<const T> to_ptr(const Array<T, N>& arr)
-	{
-		return {arr.data(), arr.size()};
-	}
-	
-//	template<typename T> inline ArrayPtr<T> to_ptr(DynamicArray<T> arr)
-//	{
-//		return {arr.data(), arr.count()};
-//	}
-	
 	template<typename T> inline void zero(ArrayPtr<T> ptr, int val = 0)
 	{
-		static_assert(!std::is_const<T>(), "Cannot zero const array");
 		memset(ptr.data(), val, byte_size(ptr));
 	}
 	
 	template<typename T, typename U> inline void copy(ArrayPtr<T> dst, ArrayPtr<U> src)
 	{
-		static_assert(!std::is_const<T>(),  "Cannot copy to const array");
 		memcpy(dst.data(), src.data(), byte_size(src));
 	}
 
