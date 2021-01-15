@@ -5,20 +5,9 @@
 #include "dynamic_array.hpp"
 #include <type_traits>
 #include <cstring>
-#include <type_traits>
 
 namespace rcom
 {
-	template<typename T, typename... Ts> constexpr Array<std::decay_t<T>, 1 + sizeof... (Ts)> make_array(T&& t, Ts&&... ts) noexcept(noexcept(std::is_nothrow_constructible<Array<std::decay_t<T>, 1 + sizeof... (Ts)>, T&&, Ts&&...>::value))
-	{
-	    return {{std::forward<T>(t), std::forward<Ts>(ts)...}};
-	}
-	
-	template<typename T> constexpr Array<std::decay<T>, 0> make_array() noexcept
-	{
-	    return {};
-	}
-
 	template<typename T> T& get_first(ArrayPtr<T> ptr)
 	{
 		return *ptr.begin();

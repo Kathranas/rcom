@@ -12,7 +12,14 @@ namespace rcom
 	template<typename T, size_t N> class Array<T, N>
 	{
 	public:
-		template<typename... Ts> inline constexpr Array(Ts&&...);
+		// Required to be an aggrigate
+		T _arr[N]; // Do not access this directly. Use data() instead
+		Array(const Array&)            = default;
+		Array(Array&&)                 = default;
+
+		Array& operator=(const Array&) = default;
+		Array& operator=(Array&&)      = default;
+		~Array()                       = default;
 	
 		inline       T&  operator[](size_t i);
 		inline const T&  operator[](size_t i)   const;
@@ -27,56 +34,51 @@ namespace rcom
 		// Multidimensional
 		inline static constexpr size_t flat_size();
 		inline static constexpr size_t sub_array_count();
-
-	private:
-		T arr[N];
 	};
 
-	template<typename T, size_t N> template<typename... Ts> constexpr Array<T, N>::Array(Ts&&... ts) :
-		arr{ts...}
-	{
-	}
+#define RCOM_MAKE_ARRAY(NAME, TYPE, ...)  rcom::Array<TYPE, std::initializer_list<TYPE>__VA_ARGS__.size()> NAME{__VA_ARGS__}
+#define RCOM_FROM_STRING(NAME, TYPE, ARR) rcom::Array<TYPE, (sizeof(ARR) / sizeof(*ARR))> NAME{ARR}
 	
 	template<typename T, size_t N> T& Array<T, N>::operator[](size_t i)
 	{
 		RCOM_ASSERT(i < size(), "Index out of range");
-		return arr[i];
+		return _arr[i];
 	}
 	
 	template<typename T, size_t N> const T& Array<T, N>::operator[](size_t i) const
 	{
 		RCOM_ASSERT(i < size(), "Index out of range");
-		return arr[i];
+		return _arr[i];
 	}
 	
 	template<typename T, size_t N> T* Array<T, N>::begin()
 	{
-		return &arr[0];
+		return &_arr[0];
 	}
 	
 	template<typename T, size_t N> const T* Array<T, N>::begin() const
 	{
-		return &arr[0];
+		return &_arr[0];
 	}
 	
 	template<typename T, size_t N> T* Array<T, N>::end()
 	{
-		return &arr[N];
+		return &_arr[N];
 	}
 	
 	template<typename T, size_t N> const T* Array<T, N>::end() const
 	{
-		return &arr[N];
+		return &_arr[N];
 	}
 	
 	template<typename T, size_t N> const T* Array<T, N>::data() const
 	{
-		return &arr[0];
+		return &_arr[0];
 	}
 	
 	template<typename T, size_t N> T* Array<T, N>::data()
 	{
-		return &arr[0];
+		return &_arr[0];
 	}
 	
 	template<typename T, size_t N> constexpr size_t Array<T, N>::size()
@@ -93,64 +95,62 @@ namespace rcom
 	template<typename T, size_t N, size_t... NS> class Array
 	{
 	public:
-		// Must be public for aggrigate initilisation
 		typedef Array<T, NS...> ArrayType;
 
-		inline constexpr Array(std::initializer_list<T>);
-	
-		inline       ArrayType&        operator[](size_t i);
-		inline const ArrayType&        operator[](size_t i)   const;
-		inline       ArrayType*        begin();
-		inline const ArrayType*        begin()                const;
-		inline       ArrayType*        end();
-		inline const ArrayType*        end()                  const;
-		inline       ArrayType*        data();
-		inline const ArrayType*        data()                 const;
+		// Required to be an aggrigate
+		Array<ArrayType, N> _arr;
+		Array(const Array&)            = default;
+		Array(Array&&)                 = default;
+
+		Array& operator=(const Array&) = default;
+		Array& operator=(Array&&)      = default;
+		~Array()                       = default;
+
+		inline       ArrayType& operator[](size_t i);
+		inline const ArrayType& operator[](size_t i)  const;
+		inline       ArrayType* begin();
+		inline const ArrayType* begin()               const;
+		inline       ArrayType* end();
+		inline const ArrayType* end()                 const;
+		inline       ArrayType* data();
+		inline const ArrayType* data()                const;
+		inline static constexpr size_t size();
 
 		// Multidimensional
-		inline static constexpr size_t size();
 		inline static constexpr size_t flat_size();
 		inline static constexpr size_t sub_array_count();
-	private:
-		Array<ArrayType, N> arr;
 	};
-
-
-	template<typename T, size_t N, size_t... NS> constexpr Array<T, N, NS...>::Array(std::initializer_list<T> init) :
-		arr{init}
-	{
-	}
 
 	template<typename T, size_t N, size_t... NS> auto Array<T, N, NS...>::operator[](size_t i) -> ArrayType&
 	{
 		RCOM_ASSERT(i < size(), "Index out of range");
-		return arr[i];
+		return _arr[i];
 	}
 
 	template<typename T, size_t N, size_t... NS> auto Array<T, N, NS...>::operator[](size_t i) const -> const ArrayType&
 	{
 		RCOM_ASSERT(i < size(), "Index out of range");
-		return arr[i];
+		return _arr[i];
 	}
 
 	template<typename T, size_t N, size_t... NS> auto Array<T, N, NS...>::begin() -> ArrayType*
 	{
-		return &arr[0];
+		return &_arr[0];
 	}
 
 	template<typename T, size_t N, size_t... NS> auto Array<T, N, NS...>::begin() const -> const ArrayType*
 	{
-		return &arr[0];
+		return &_arr[0];
 	}
 
 	template<typename T, size_t N, size_t... NS> auto Array<T, N, NS...>::end() -> ArrayType*
 	{
-		return &arr[N];
+		return &_arr[N];
 	}
 
 	template<typename T, size_t N, size_t... NS> auto Array<T, N, NS...>::end() const -> const ArrayType*
 	{
-		return &arr[N];
+		return &_arr[N];
 	}
 
 	template<typename T, size_t N, size_t... NS> constexpr size_t Array<T, N, NS...>::size()
@@ -166,11 +166,6 @@ namespace rcom
 	template<typename T, size_t N, size_t... NS> constexpr size_t Array<T, N, NS...>::sub_array_count()
 	{
 		return sizeof...(NS);
-	}
-
-	template<typename T, typename... Ts> auto make_array(Ts&&... ts)
-	{
-		return rcom::Array<T, sizeof...(ts)>(ts...);
 	}
 }
 // namespace::rcom
