@@ -164,12 +164,12 @@ namespace rcom
 		return {data(), N};
 	}
 
-	template<typename T, size_t N, size_t... NS> Array<T, N, NS...>::operator ArrayPtr<ArrayType>()
+	template<typename T, size_t N, size_t... NS> Array<T, N, NS...>::operator ArrayPtr<Array::ArrayType>()
 	{
 		return to_ptr();
 	}
 
-	template<typename T, size_t N, size_t... NS> Array<T, N, NS...>::operator ArrayPtr<const ArrayType>() const
+	template<typename T, size_t N, size_t... NS> Array<T, N, NS...>::operator ArrayPtr<const Array::ArrayType>() const
 	{
 		return to_ptr();
 	}
