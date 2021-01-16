@@ -32,16 +32,6 @@ namespace rcom
 		return ptr.size() * sizeof(T);
 	}
 	
-	template<typename T> ArrayPtr<T> to_ptr(T* ptr, size_t n)
-	{
-		return {ptr, n};
-	}
-	
-	template<typename T, size_t N> ArrayPtr<T> to_ptr(T (&arr)[N])
-	{
-	    return {arr};
-	}
-	
 	template<typename T> inline void zero(ArrayPtr<T> ptr, int val = 0)
 	{
 		memset(ptr.data(), val, byte_size(ptr));
