@@ -27,9 +27,19 @@ namespace rcom
 		return nullptr;
 	}
 	
-	template<typename T> inline size_t byte_size(ArrayPtr<T> ptr)
+	template<typename T> size_t byte_size(size_t count)
 	{
-		return ptr.size() * sizeof(T);
+		return count * sizeof(T);
+	}
+
+	template<typename T> size_t byte_size(ArrayPtr<T> ptr)
+	{
+		return byte_size<T>(ptr.size());
+	}
+	
+	template<typename T> rcom::BytePtr to_bytes(rcom::ArrayPtr<T> ptr)
+	{
+		return {static_cast<uint8_t*>(ptr.data()), byte_size(ptr)};
 	}
 	
 	template<typename T> inline void zero(ArrayPtr<T> ptr, int val = 0)
