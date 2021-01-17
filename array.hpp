@@ -270,7 +270,7 @@ namespace rcom
 
 	template<typename T, size_t N, size_t... NS> constexpr size_t Array<T, N, NS...>::byte_size()
 	{
-		return ArrayType::byte_size();
+		return N * sizeof(ArrayType);
 	}
 
 	template<typename T, size_t N, size_t... NS> constexpr size_t Array<T, N, NS...>::flat_size()
