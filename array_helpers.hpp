@@ -1,12 +1,15 @@
 #pragma once
 
 #include "array_ptr.hpp"
+#include "assert.hpp"
 #include <cstring>
 
 namespace rcom
 {
 	template<typename T> T* linear_search(ArrayPtr<T> ptr, const T& value)
 	{
+		RCOM_ASSERT(ptr, "Null pointer");
+
 		for(size_t i = 0; i < ptr.size(); ++i)
 		{
 			if(ptr[i] == value)
@@ -16,19 +19,33 @@ namespace rcom
 		}
 		return nullptr;
 	}
-	template<typename T> inline void zero(ArrayPtr<T> ptr, int val = 0)
+
+	inline void zero(BytePtr ptr, int val = 0)
 	{
-		memset(ptr.data(), val, byte_size(ptr));
+		RCOM_ASSERT(ptr, "Null pointer");
+
+		memset(ptr.data(), val, ptr.byte_size());
 	}
 	
-	template<typename T, typename U> inline void copy(ArrayPtr<T> dst, const ArrayPtr<U> src)
+	inline void copy(BytePtr dst, const BytePtr src)
 	{
-		memcpy(dst.data(), src.data(), byte_size(src));
+		RCOM_ASSERT(dst && src, "Null pointer");
+		RCOM_ASSERT(dst.byte_size() >= src.byte_size());
+
+		memcpy(dst.data(), src.data(), src.byte_size());
 	}
 
-	template<typename T, typename U> inline int compare(const ArrayPtr<T> dst, const ArrayPtr<U> src)
+	inline int compare(const BytePtr dst, const BytePtr src)
 	{
+		RCOM_ASSERT(dst && src, "Null pointer");
+		RCOM_ASSERT(dst.byte_size() >= src.byte_size());
+
 		return memcmp(dst.data(), src.data(), src.byte_size());
+	}
+
+	inline bool equal(const BytePtr dst, const BytePtr src)
+	{
+		return compare(dst, src) == 0;
 	}
 }
 // namespace::rcom
