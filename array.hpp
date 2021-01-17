@@ -166,82 +166,111 @@ namespace rcom
 		Array& operator=(Array&&)      = default;
 		~Array()                       = default;
 
-		// ArrayPtr conversion
-		inline operator ArrayPtr<ArrayType>();
-		inline operator ArrayPtr<const ArrayType>() const;
-		inline ArrayPtr<ArrayType>       to_ptr();
-		inline ArrayPtr<const ArrayType> to_ptr() const;
-
-		inline       ArrayType& operator[](size_t i);
-		inline const ArrayType& operator[](size_t i)  const;
-		inline       ArrayType* begin();
-		inline const ArrayType* begin()               const;
-		inline       ArrayType* end();
-		inline const ArrayType* end()                 const;
-		inline       ArrayType* data();
-		inline const ArrayType* data()                const;
 		inline static constexpr size_t size();
+		inline static constexpr size_t byte_size();
 
 		// Multidimensional
 		inline static constexpr size_t flat_size();
 		inline static constexpr size_t sub_array_count();
+
+		inline       ArrayPtr<ArrayType> to_ptr();
+		inline const ArrayPtr<ArrayType> to_ptr() const;
+		inline       BytePtr             to_bytes();
+		inline const BytePtr             to_bytes() const;
+
+		inline       ArrayType& operator[](size_t i);
+		inline const ArrayType& operator[](size_t i)  const;
+
+		inline       ArrayType* data();
+		inline const ArrayType* data()   const;
+		inline       ArrayType* begin();
+		inline const ArrayType* begin()  const;
+		inline       ArrayType* end();
+		inline const ArrayType* end()    const;
+		inline       ArrayType& first();
+		inline const ArrayType& first()  const;
+		inline       ArrayType& last();
+		inline const ArrayType& last()   const;
 	};
 
-	template<typename T, size_t N, size_t... NS> auto Array<T, N, NS...>::to_ptr()       -> ArrayPtr<ArrayType>
+	template<typename T, size_t N, size_t... NS> auto Array<T, N, NS...>::to_ptr() -> ArrayPtr<ArrayType>
 	{
-		return {data(), N};
+		return _arr.to_ptr();
 	}
 
-	template<typename T, size_t N, size_t... NS> auto Array<T, N, NS...>::to_ptr() const -> ArrayPtr<const ArrayType>
+	template<typename T, size_t N, size_t... NS> auto Array<T, N, NS...>::to_ptr() const -> const ArrayPtr<ArrayType>
 	{
-		return {data(), N};
+		return _arr.to_ptr();
 	}
 
-	template<typename T, size_t N, size_t... NS> Array<T, N, NS...>::operator ArrayPtr<Array::ArrayType>()
+	template<typename T, size_t N, size_t... NS> auto Array<T, N, NS...>::to_bytes() -> BytePtr
 	{
-		return to_ptr();
+		return _arr.to_bytes();
 	}
 
-	template<typename T, size_t N, size_t... NS> Array<T, N, NS...>::operator ArrayPtr<const Array::ArrayType>() const
+	template<typename T, size_t N, size_t... NS> auto Array<T, N, NS...>::to_bytes() const -> const BytePtr
 	{
-		return to_ptr();
+		return _arr.to_bytes();
 	}
 
 	template<typename T, size_t N, size_t... NS> auto Array<T, N, NS...>::operator[](size_t i) -> ArrayType&
 	{
-		RCOM_ASSERT(i < size(), "Index out of range");
 		return _arr[i];
 	}
 
 	template<typename T, size_t N, size_t... NS> auto Array<T, N, NS...>::operator[](size_t i) const -> const ArrayType&
 	{
-		RCOM_ASSERT(i < size(), "Index out of range");
 		return _arr[i];
 	}
 
 	template<typename T, size_t N, size_t... NS> auto Array<T, N, NS...>::begin() -> ArrayType*
 	{
-		return &_arr[0];
+		return _arr.begin();
 	}
 
 	template<typename T, size_t N, size_t... NS> auto Array<T, N, NS...>::begin() const -> const ArrayType*
 	{
-		return &_arr[0];
+		return _arr.begin();
 	}
 
 	template<typename T, size_t N, size_t... NS> auto Array<T, N, NS...>::end() -> ArrayType*
 	{
-		return &_arr[N];
+		return _arr.end();
 	}
 
 	template<typename T, size_t N, size_t... NS> auto Array<T, N, NS...>::end() const -> const ArrayType*
 	{
-		return &_arr[N];
+		return _arr.end();
+	}
+
+	template<typename T, size_t N, size_t... NS> auto Array<T, N, NS...>::first() -> ArrayType&
+	{
+		return _arr.first();
+	}
+
+	template<typename T, size_t N, size_t... NS> auto Array<T, N, NS...>::first() const -> const ArrayType&
+	{
+		return _arr.first();
+	}
+
+	template<typename T, size_t N, size_t... NS> auto Array<T, N, NS...>::last() -> ArrayType&
+	{
+		return _arr.last();
+	}
+
+	template<typename T, size_t N, size_t... NS> auto Array<T, N, NS...>::last() const -> const ArrayType&
+	{
+		return _arr.last();
 	}
 
 	template<typename T, size_t N, size_t... NS> constexpr size_t Array<T, N, NS...>::size()
 	{
-		return N;
+		return ArrayType::size();
+	}
+
+	template<typename T, size_t N, size_t... NS> constexpr size_t Array<T, N, NS...>::byte_size()
+	{
+		return ArrayType::byte_size();
 	}
 
 	template<typename T, size_t N, size_t... NS> constexpr size_t Array<T, N, NS...>::flat_size()
