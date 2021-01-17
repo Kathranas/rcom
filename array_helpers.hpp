@@ -39,7 +39,7 @@ namespace rcom
 	
 	template<typename T> rcom::BytePtr to_bytes(rcom::ArrayPtr<T> ptr)
 	{
-		return {static_cast<uint8_t*>(ptr.data()), byte_size(ptr)};
+		return {static_cast<uint8_t*>((void*)ptr.data()), byte_size(ptr)};
 	}
 	
 	template<typename T> inline void zero(ArrayPtr<T> ptr, int val = 0)
