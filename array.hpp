@@ -18,6 +18,7 @@ namespace rcom
 		Array(const Array&)            = default;
 		Array(Array&&)                 = default;
 
+		Array()                        = default;
 		Array& operator=(const Array&) = default;
 		Array& operator=(Array&&)      = default;
 		~Array()                       = default;
