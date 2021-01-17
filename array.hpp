@@ -23,25 +23,32 @@ namespace rcom
 		Array& operator=(Array&&)      = default;
 		~Array()                       = default;
 
-		// ArrayPtr Conversion
-		inline operator ArrayPtr<T>();
-		inline operator ArrayPtr<const T>() const;
-		inline ArrayPtr<T>       to_ptr();
-		inline ArrayPtr<const T> to_ptr() const;
-	
-		inline       T&  operator[](size_t i);
-		inline const T&  operator[](size_t i)   const;
-		inline       T*  begin();
-		inline const T*  begin()                const;
-		inline       T*  end();
-		inline const T*  end()                  const;
-		inline       T*  data();
-		inline const T*  data()                 const;
 		inline static constexpr size_t size();
+		inline static constexpr size_t byte_size();
 
 		// Multidimensional
 		inline static constexpr size_t flat_size();
 		inline static constexpr size_t sub_array_count();
+
+		inline       ArrayPtr<T> to_ptr();
+		inline const ArrayPtr<T> to_ptr() const;
+
+		inline       BytePtr to_bytes();
+		inline const BytePtr to_bytes() const;
+
+		inline       T& operator[](size_t i);
+		inline const T& operator[](size_t i) const;
+
+		inline       T* data();
+		inline const T* data()   const;
+		inline       T* begin();
+		inline const T* begin()  const;
+		inline       T* end();
+		inline const T* end()    const;
+		inline       T& first();
+		inline const T& first()  const;
+		inline       T& last();
+		inline const T& last()   const;
 	};
 
 #define RCOM_MAKE_ARRAY(NAME, TYPE, ...)  rcom::Array<TYPE, std::initializer_list<TYPE>__VA_ARGS__.size()> NAME{__VA_ARGS__}
@@ -52,21 +59,26 @@ namespace rcom
 		return {data(), N};
 	}
 
-	template<typename T, size_t N> ArrayPtr<const T> Array<T, N>::to_ptr() const
+	template<typename T, size_t N> const ArrayPtr<T> Array<T, N>::to_ptr() const
 	{
 		return {data(), N};
 	}
 
-	template<typename T, size_t N> Array<T, N>::operator ArrayPtr<T>()
+	template<typename T, size_t N> constexpr size_t Array<T, N>::byte_size()
 	{
-		return to_ptr();
+		return N * sizeof(T);
 	}
 
-	template<typename T, size_t N> Array<T, N>::operator ArrayPtr<const T>() const
+	template<typename T, size_t N> BytePtr Array<T, N>::to_bytes()
 	{
-		return to_ptr();
+		return {static_cast<uint8_t*>((void*)data()), byte_size()};
 	}
-	
+
+	template<typename T, size_t N> const BytePtr Array<T, N>::to_bytes() const
+	{
+		return {static_cast<uint8_t*>((void*)data()), byte_size()};
+	}
+
 	template<typename T, size_t N> T& Array<T, N>::operator[](size_t i)
 	{
 		RCOM_ASSERT(i < size(), "Index out of range");
@@ -107,6 +119,26 @@ namespace rcom
 	template<typename T, size_t N> T* Array<T, N>::data()
 	{
 		return &_arr[0];
+	}
+
+	template<typename T, size_t N> T& Array<T, N>::first()
+	{
+		return _arr[0];
+	}
+
+	template<typename T, size_t N> const T& Array<T, N>::first() const
+	{
+		return _arr[0];
+	}
+
+	template<typename T, size_t N> T& Array<T, N>::last()
+	{
+		return _arr[N-1];
+	}
+
+	template<typename T, size_t N> const T& Array<T, N>::last() const
+	{
+		return _arr[N-1];
 	}
 	
 	template<typename T, size_t N> constexpr size_t Array<T, N>::size()
