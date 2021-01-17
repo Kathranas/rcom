@@ -5,6 +5,9 @@
 
 namespace rcom
 {
+	template<typename T> class ArrayPtr;
+	typedef ArrayPtr<uint8_t>  BytePtr;
+
 	template<typename T> class ArrayPtr
 	{
 	public:
@@ -13,25 +16,34 @@ namespace rcom
 		inline ArrayPtr(T* t, size_t n);
 		template<size_t N> inline ArrayPtr(T(&t)[N]);
 	
-		inline           operator ArrayPtr<const T>() const;
-		inline           operator bool()              const;
+		inline operator ArrayPtr<const T>() const;
+		inline operator bool()              const;
+
+		inline size_t&   size();
+		inline size_t    size()      const;
+		inline size_t    byte_size() const;
+
+		inline       BytePtr to_bytes();
+		inline const BytePtr to_bytes() const;
 	
 		inline       T&  operator[](size_t i);
-		inline const T&  operator[](size_t i)   const;
+		inline const T&  operator[](size_t i)  const;
+
 		inline       T*  begin();
-		inline const T*  begin()                const;
+		inline const T*  begin() const;
 		inline       T*  end();
-		inline const T*  end()                  const;
+		inline const T*  end()   const;
+		inline       T&  first();
+		inline const T&  first() const;
+		inline       T&  last();
+		inline const T&  last()  const;
+
 		inline       T*& data();
-		inline const T*  data()                 const;
-		inline size_t&   size();
-		inline size_t    size()                 const;
+		inline const T*  data()  const;
 	private:
 		T*     ptr;
 		size_t len;
 	};
-	
-	typedef ArrayPtr<uint8_t> BytePtr;
 	
 	template<typename T> ArrayPtr<T>::ArrayPtr() :
 		ptr{nullptr},
@@ -70,6 +82,30 @@ namespace rcom
 	{
 		RCOM_ASSERT(i < size(), "Index out of range");
 		return ptr[i];
+	}
+
+	template<typename T> T& ArrayPtr<T>::first()
+	{
+		RCOM_ASSERT(size() > 0, "Index out of range");
+		return ptr[0];
+	}
+
+	template<typename T> const T& ArrayPtr<T>::first() const
+	{
+		RCOM_ASSERT(size() > 0, "Index out of range");
+		return ptr[0];
+	}
+
+	template<typename T> T& ArrayPtr<T>::last()
+	{
+		RCOM_ASSERT(size() > 0, "Index out of range");
+		return ptr[size() - 1];
+	}
+
+	template<typename T> const T& ArrayPtr<T>::last() const
+	{
+		RCOM_ASSERT(size() > 0, "Index out of range");
+		return ptr[size() - 1];
 	}
 	
 	template<typename T> T* ArrayPtr<T>::begin()
@@ -115,6 +151,21 @@ namespace rcom
 	template<typename T> size_t  ArrayPtr<T>::size() const
 	{
 		return len;
+	}
+
+	template<typename T> size_t ArrayPtr<T>::byte_size() const
+	{
+		return size() * sizeof(T);
+	}
+
+	template<typename T> rcom::BytePtr ArrayPtr<T>::to_bytes()
+	{
+		return {static_cast<uint8_t*>((void*)data()), byte_size()};
+	}
+
+	template<typename T> const rcom::BytePtr ArrayPtr<T>::to_bytes() const
+	{
+		return {static_cast<uint8_t*>((void*)data()), byte_size()};
 	}
 
 	// Helper functions
