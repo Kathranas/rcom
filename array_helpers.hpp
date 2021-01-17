@@ -21,12 +21,12 @@ namespace rcom
 		memset(ptr.data(), val, byte_size(ptr));
 	}
 	
-	template<typename T, typename U> inline void copy(ArrayPtr<T> dst, ArrayPtr<U> src)
+	template<typename T, typename U> inline void copy(ArrayPtr<T> dst, const ArrayPtr<U> src)
 	{
 		memcpy(dst.data(), src.data(), byte_size(src));
 	}
 
-	template<typename T, typename U> inline int compare(ArrayPtr<T> dst, ArrayPtr<U> src)
+	template<typename T, typename U> inline int compare(const ArrayPtr<T> dst, const ArrayPtr<U> src)
 	{
 		return memcmp(dst.data(), src.data(), src.byte_size());
 	}
