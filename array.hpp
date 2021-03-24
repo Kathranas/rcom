@@ -6,7 +6,6 @@
 #include <initializer_list>
 
 #define RCOM_ARRAY_SIZE(ARR) (sizeof(ARR) / sizeof(*ARR))
-
 #define RCOM_MAKE_ARRAY(NAME, TYPE, ...)  rcom::Array<TYPE, std::initializer_list<TYPE>__VA_ARGS__.size()> NAME{__VA_ARGS__}
 #define RCOM_FROM_STRING(NAME, TYPE, ARR) rcom::Array<TYPE, RCOM_ARRAY_SIZE(ARR)> NAME{ARR}
 
@@ -18,27 +17,35 @@ namespace rcom
 	template<typename T, size_t N> class Array<T, N>
 	{
 	public:
+		static_assert(N > 0, "Array must be of non zero size");
+
 		// Required to be an aggrigate
-		T _arr[N]; // Do not access this directly. Use data() instead
+		// Do not access this directly. Use data() instead
+		T _arr[N];
+
+		constexpr static const size_t _flat_size = {N};
+		constexpr static const size_t _byte_size = {_flat_size * sizeof(T)};
 
 		Array()                        = default;
 		Array(const Array&)            = default;
 		Array(Array&&)                 = default;
-
 		Array& operator=(const Array&) = default;
 		Array& operator=(Array&&)      = default;
 		~Array()                       = default;
 
+		template<size_t NN = 0>
 		inline static constexpr size_t size();
 		inline static constexpr size_t byte_size();
+		inline static constexpr size_t flat_size();
 
 		inline       ArrayPtr<T> to_ptr();
 		inline const ArrayPtr<T> to_ptr() const;
+		inline       ArrayPtr<T> to_flat();
+		inline const ArrayPtr<T> to_flat() const;
+		inline       BytePtr     to_bytes();
+		inline const BytePtr     to_bytes() const;
 
-		inline       BytePtr to_bytes();
-		inline const BytePtr to_bytes() const;
-
-		inline constexpr      T& operator[](size_t i);
+		inline constexpr       T& operator[](size_t i);
 		inline constexpr const T& operator[](size_t i) const;
 
 		inline       T* data();
@@ -55,38 +62,48 @@ namespace rcom
 
 	template<typename T, size_t N> ArrayPtr<T> Array<T, N>::to_ptr()
 	{
-		return {data(), N};
+		return {_arr, N};
 	}
 
 	template<typename T, size_t N> const ArrayPtr<T> Array<T, N>::to_ptr() const
 	{
-		return {data(), N};
+		return {_arr, N};
+	}
+
+	template<typename T, size_t N> ArrayPtr<T> Array<T, N>::to_flat()
+	{
+		return {_arr, _flat_size};
+	}
+
+	template<typename T, size_t N> const ArrayPtr<T> Array<T, N>::to_flat() const
+	{
+		return {_arr, _flat_size};
 	}
 
 	template<typename T, size_t N> constexpr size_t Array<T, N>::byte_size()
 	{
-		return N * sizeof(T);
+		return _byte_size;
 	}
 
 	template<typename T, size_t N> BytePtr Array<T, N>::to_bytes()
 	{
-		return {static_cast<uint8_t*>((void*)data()), byte_size()};
+		return {reinterpret_cast<uint8_t*>(_arr), _byte_size};
 	}
 
 	template<typename T, size_t N> const BytePtr Array<T, N>::to_bytes() const
 	{
-		return {static_cast<uint8_t*>((void*)data()), byte_size()};
+		return {reinterpret_cast<uint8_t*>(_arr), _byte_size};
 	}
 
 	template<typename T, size_t N> constexpr T& Array<T, N>::operator[](size_t i)
 	{
-		RCOM_ASSERT(i < size(), "Index out of range");
+		RCOM_ASSERT(i < N, "Index out of range");
 		return _arr[i];
 	}
 	
 	template<typename T, size_t N> constexpr const T& Array<T, N>::operator[](size_t i) const
 	{
-		RCOM_ASSERT(i < size(), "Index out of range");
+		RCOM_ASSERT(i < N, "Index out of range");
 		return _arr[i];
 	}
 	
@@ -139,9 +156,11 @@ namespace rcom
 	{
 		return _arr[N-1];
 	}
-	
-	template<typename T, size_t N> constexpr size_t Array<T, N>::size()
+
+	template<typename T, size_t N>
+	template<size_t NN> constexpr size_t Array<T, N>::size()
 	{
+		static_assert(NN < N, "Multidimensional array index out of range");
 		return N;
 	}
 
@@ -149,6 +168,8 @@ namespace rcom
 	template<typename T, size_t N, size_t... NS> class Array
 	{
 	public:
+		static_assert(N > 0, "Array must be of non zero size");
+
 		typedef Array<T, NS...> ArrayType;
 
 		// Required to be an aggrigate
@@ -158,21 +179,26 @@ namespace rcom
 		// Sizes of each array available at compile time
 		constexpr static const Array<size_t, 1 + sizeof...(NS)> _sizes{N, NS...};
 
+		constexpr static const size_t _flat_size = sizeof(_arr) / sizeof(T);
+		constexpr static const size_t _byte_size = _flat_size * sizeof(T);
+
 		Array()                        = default;
 		Array(const Array&)            = default;
 		Array(Array&&)                 = default;
-
 		Array& operator=(const Array&) = default;
 		Array& operator=(Array&&)      = default;
 		~Array()                       = default;
 
-		// Multidimensional
 		template<size_t NN = 0>
 		inline static constexpr size_t size();
+
 		inline static constexpr size_t byte_size();
+		inline static constexpr size_t flat_size();
 
 		inline       ArrayPtr<ArrayType> to_ptr();
 		inline const ArrayPtr<ArrayType> to_ptr() const;
+		inline       ArrayPtr<T>         to_flat();
+		inline const ArrayPtr<T>         to_flat() const;
 		inline       BytePtr             to_bytes();
 		inline const BytePtr             to_bytes() const;
 
@@ -203,21 +229,23 @@ namespace rcom
 
 	template<typename T, size_t N, size_t... NS> auto Array<T, N, NS...>::to_bytes() -> BytePtr
 	{
-		return {static_cast<uint8_t*>((void*)data()), byte_size()};
+		return {reinterpret_cast<uint8_t*>(_arr), _byte_size};
 	}
 
 	template<typename T, size_t N, size_t... NS> auto Array<T, N, NS...>::to_bytes() const -> const BytePtr
 	{
-		return {static_cast<uint8_t*>((void*)data()), byte_size()};
+		return {reinterpret_cast<uint8_t*>(_arr), _byte_size};
 	}
 
 	template<typename T, size_t N, size_t... NS> constexpr auto Array<T, N, NS...>::operator[](size_t i) -> ArrayType&
 	{
+		RCOM_ASSERT(i < N, "Index out of range");
 		return _arr[i];
 	}
 
 	template<typename T, size_t N, size_t... NS> constexpr auto Array<T, N, NS...>::operator[](size_t i) const -> const ArrayType&
 	{
+		RCOM_ASSERT(i < N, "Index out of range");
 		return _arr[i];
 	}
 
@@ -264,12 +292,28 @@ namespace rcom
 	template<typename T, size_t N, size_t... NS>
 	template<size_t NN> constexpr size_t Array<T, N, NS...>::size()
 	{
+		static_assert(NN < N, "Multidimensional array index out of range");
 		return _sizes[NN];
 	}
 
 	template<typename T, size_t N, size_t... NS> constexpr size_t Array<T, N, NS...>::byte_size()
 	{
-		return size() * sizeof(T);
+		return _byte_size;
+	}
+
+	template<typename T, size_t N, size_t... NS> constexpr size_t Array<T, N, NS...>::flat_size()
+	{
+		return _flat_size;
+	}
+
+	template<typename T, size_t N, size_t... NS> ArrayPtr<T> Array<T, N, NS...>::to_flat()
+	{
+		return {reinterpret_cast<T*>(_arr), _flat_size};
+	}
+
+	template<typename T, size_t N, size_t... NS> const ArrayPtr<T> Array<T, N, NS...>::to_flat() const
+	{
+		return {reinterpret_cast<T*>(_arr), _flat_size};
 	}
 }
 // namespace::rcom
