@@ -1,13 +1,10 @@
 #pragma once
 
-#include "fundamental.hpp"
-#include "assert.hpp"
 #include "array_ptr.hpp"
 #include <initializer_list>
 
-#define RCOM_ARRAY_SIZE(ARR) (sizeof(ARR) / sizeof(*ARR))
-#define RCOM_MAKE_ARRAY(NAME, TYPE, ...)  rcom::Array<TYPE, std::initializer_list<TYPE>__VA_ARGS__.size()> NAME{__VA_ARGS__}
-#define RCOM_FROM_STRING(NAME, TYPE, ARR) rcom::Array<TYPE, RCOM_ARRAY_SIZE(ARR)> NAME{ARR}
+#define RCOM_ARRAY(TYPE, NAME, ...)        rcom::Array<TYPE, std::initializer_list<TYPE>__VA_ARGS__.size()> NAME{__VA_ARGS__}
+#define RCOM_ARRAY_STRING(TYPE, NAME, ARR) rcom::Array<TYPE, RCOM_ARRAY_SIZE(ARR)> NAME{ARR}
 
 namespace rcom
 {

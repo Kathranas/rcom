@@ -1,7 +1,7 @@
 #pragma once
 
-#include "fundamental.hpp"
-#include "assert.hpp"
+#include "basic.hpp"
+#include <cstring>
 
 namespace rcom
 {
@@ -190,14 +190,56 @@ namespace rcom
 		return operator!=(ptr, nullptr);
 	}
 
-	template<typename T> ArrayPtr<T> to_ptr(T* ptr, size_t n)
+	template<typename T> inline ArrayPtr<T> to_ptr(T* ptr, size_t n)
 	{
 		return {ptr, n};
 	}
 	
-	template<typename T, size_t N> ArrayPtr<T> to_ptr(T (&arr)[N])
+	template<typename T, size_t N> inline ArrayPtr<T> to_ptr(T (&arr)[N])
 	{
 	    return {arr};
+	}
+
+	template<typename T> T* linear_search(ArrayPtr<T> ptr, const T& value)
+	{
+		RCOM_ASSERT(ptr, "Null pointer");
+
+		for(size_t i = 0; i < ptr.size(); ++i)
+		{
+			if(ptr[i] == value)
+			{
+				return &ptr[i];
+			}
+		}
+		return nullptr;
+	}
+
+	inline void zero_mem(BytePtr ptr, int val = 0)
+	{
+		RCOM_ASSERT(ptr, "Null pointer");
+
+		memset(ptr.data(), val, ptr.byte_size());
+	}
+	
+	inline void copy_mem(BytePtr dst, const BytePtr src)
+	{
+		RCOM_ASSERT(dst && src, "Null pointer");
+		RCOM_ASSERT(dst.byte_size() >= src.byte_size(), "Array too small");
+
+		memcpy(dst.data(), src.data(), src.byte_size());
+	}
+
+	inline int compare_mem(const BytePtr dst, const BytePtr src)
+	{
+		RCOM_ASSERT(dst && src, "Null pointer");
+		RCOM_ASSERT(dst.byte_size() >= src.byte_size(), "Array too small");
+
+		return memcmp(dst.data(), src.data(), src.byte_size());
+	}
+
+	inline bool equal_mem(const BytePtr dst, const BytePtr src)
+	{
+		return compare_mem(dst, src) == 0;
 	}
 }
 // namespace::rcom

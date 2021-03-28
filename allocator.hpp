@@ -1,17 +1,9 @@
 #pragma once
 
-#include "fundamental.hpp"
-#include "assert.hpp"
 #include "array_ptr.hpp"
-#include "array_helpers.hpp"
 
 namespace rcom
 {
-	template<typename T> constexpr size_t byte_size(size_t count)
-	{
-		return count * sizeof(T);
-	}
-
 	class Allocator
 	{
 	public:
@@ -28,6 +20,7 @@ namespace rcom
 		BytePtr ptr = alloc(byte_size<T>(count));
 		RCOM_ASSERT(ptr, "Failed to allocate");
 
+		// Placement new
 		return {new(ptr.data())T, count};
 	}
 
