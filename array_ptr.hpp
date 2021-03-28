@@ -214,14 +214,14 @@ namespace rcom
 		return nullptr;
 	}
 
-	inline void zero_mem(BytePtr ptr, int val = 0)
+	inline void set_memory(BytePtr ptr, int val = 0)
 	{
 		RCOM_ASSERT(ptr, "Null pointer");
 
 		memset(ptr.data(), val, ptr.byte_size());
 	}
 	
-	inline void copy_mem(BytePtr dst, const BytePtr src)
+	inline void copy_memory(BytePtr dst, const BytePtr src)
 	{
 		RCOM_ASSERT(dst && src, "Null pointer");
 		RCOM_ASSERT(dst.byte_size() >= src.byte_size(), "Array too small");
@@ -229,17 +229,32 @@ namespace rcom
 		memcpy(dst.data(), src.data(), src.byte_size());
 	}
 
-	inline int compare_mem(const BytePtr dst, const BytePtr src)
+	inline void move_memory(BytePtr dst, const BytePtr src)
 	{
 		RCOM_ASSERT(dst && src, "Null pointer");
 		RCOM_ASSERT(dst.byte_size() >= src.byte_size(), "Array too small");
 
-		return memcmp(dst.data(), src.data(), src.byte_size());
+		memmove(dst.data(), src.data(), src.byte_size());
 	}
 
-	inline bool equal_mem(const BytePtr dst, const BytePtr src)
+	inline int compare_memory(const BytePtr dst, const BytePtr src, size_t n)
 	{
-		return compare_mem(dst, src) == 0;
+		RCOM_ASSERT(dst && src, "Null pointer");
+		RCOM_ASSERT(dst.byte_size() >= n && src.byte_size() >= n, "Array too small");
+
+		return memcmp(dst.data(), src.data(), n);
+	}
+
+	inline bool equate_memory(const BytePtr dst, const BytePtr src)
+	{
+		RCOM_ASSERT(dst && src, "Null pointer");
+
+		if(dst.byte_size() != src.byte_size())
+		{
+			return false;
+		}
+
+		return memcmp(dst.data(), src.data(), dst.byte_size()) == 0;
 	}
 }
 // namespace::rcom
