@@ -150,12 +150,12 @@ namespace rcom
 
 	template<typename T, size_t N> const BytePtr Array<T, N>::byte_slice(size_t start) const
 	{
-		return byte_slice(start, len);
+		return byte_slice(start, N);
 	}
 
 	template<typename T, size_t N> BytePtr Array<T, N>::byte_slice(size_t start)
 	{
-		return byte_slice(start, len);
+		return byte_slice(start, N);
 	}
 
 	template<typename T, size_t N> constexpr T& Array<T, N>::operator[](size_t i)
@@ -328,6 +328,16 @@ namespace rcom
 		return {&_arr[start], end - start};
 	}
 
+	template<typename T, size_t N, size_t... NS> auto Array<T, N, NS...>::slice(size_t start) const -> const ArrayPtr<ArrayType>
+	{
+		return slice(start, N);
+	}
+
+	template<typename T, size_t N, size_t... NS> auto Array<T, N, NS...>::slice(size_t start) -> ArrayPtr<ArrayType>
+	{
+		return slice(start, N);
+	}
+
 	template<typename T, size_t N, size_t... NS> const BytePtr Array<T, N, NS...>::byte_slice(size_t start, size_t end) const
 	{
 		RCOM_ASSERT(start  > 0,     "Index out of range");
@@ -348,12 +358,12 @@ namespace rcom
 
 	template<typename T, size_t N, size_t... NS> const BytePtr Array<T, N, NS...>::byte_slice(size_t start) const
 	{
-		return byte_slice(start, len);
+		return byte_slice(start, N);
 	}
 
 	template<typename T, size_t N, size_t... NS> BytePtr Array<T, N, NS...>::byte_slice(size_t start)
 	{
-		return byte_slice(start, len);
+		return byte_slice(start, N);
 	}
 
 	template<typename T, size_t N, size_t... NS> constexpr auto Array<T, N, NS...>::operator[](size_t i) -> ArrayType&
