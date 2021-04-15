@@ -22,7 +22,7 @@
 #define RCOM_XSTRINGIFY(x) RCOM_STRINGIFY(x)
 
 // Location as a string
-#define RCOM_CODE_LOCATION "FILE: " __FILE__ " Line: " RCOM_XSTRINGIFY(__LINE__)
+#define RCOM_CODE_LOCATION "Line: " RCOM_XSTRINGIFY(__LINE__) " File: " __FILE__
 
 // Size of a carray
 #define RCOM_CARRAY_SIZE(ARR) (sizeof(ARR) / sizeof(*ARR))
@@ -49,7 +49,7 @@ namespace rcom { namespace hidden
 // namespace rcom::hidden
 
 #if defined(RCOM_ASSERTS_ENABLED)
-	#define RCOM_ASSERT(x, msg, ...) if(x) rcom::hidden::assert_imp("Failed Assertion: " msg " at: " RCOM_CODE_LOCATION, __VA_ARGS__)
+	#define RCOM_ASSERT(x, msg, ...) if(!(x)) rcom::hidden::assert_imp("Failed Assertion: " msg " at: " RCOM_CODE_LOCATION, __VA_ARGS__)
 #else
 	#define RCOM_ASSERT(x, msg, ...)
 #endif
