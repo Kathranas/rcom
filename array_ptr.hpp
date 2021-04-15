@@ -307,24 +307,28 @@ namespace rcom
 		memmove(dst.data(), src.data(), src.byte_size());
 	}
 
-	inline int compare_memory(const BytePtr dst, const BytePtr src, size_t n)
+	inline int compare_memory(const BytePtr lhs, const BytePtr rhs)
 	{
-		RCOM_ASSERT(dst && src, "Null pointer");
-		RCOM_ASSERT(dst.byte_size() >= n && src.byte_size() >= n, "Array too small");
+		RCOM_ASSERT(lhs && rhs, "Null pointer");
 
-		return memcmp(dst.data(), src.data(), n);
+		bool   equal_length = lhs.size() == rhs.size();
+		bool   lhs_longer   = lhs.size() > rhs.size();
+		size_t len          = lhs_longer ? rhs.size() : lhs.size();
+		int    result       = memcmp(lhs.data(), rhs.data(), len);
+
+		if(!equal_length && result == 0)
+		{
+			return lhs_longer ? 1 : -1;
+		}
+		else
+		{
+			return result;
+		}
 	}
 
-	inline bool equate_memory(const BytePtr dst, const BytePtr src)
+	inline bool equate_memory(const BytePtr lhs, const BytePtr rhs)
 	{
-		RCOM_ASSERT(dst && src, "Null pointer");
-
-		if(dst.byte_size() != src.byte_size())
-		{
-			return false;
-		}
-
-		return memcmp(dst.data(), src.data(), dst.byte_size()) == 0;
+		return compare_memory(lhs, rhs) == 0;
 	}
 }
 // namespace::rcom
