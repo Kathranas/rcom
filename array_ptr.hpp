@@ -96,20 +96,20 @@ namespace rcom
 
 	template<typename T> const ArrayPtr<T> ArrayPtr<T>::slice(size_t start, size_t end) const
 	{
-		RCOM_ASSERT(len    > 0,      "Index out of range");
-		RCOM_ASSERT(start  > 0,      "Index out of range");
-		RCOM_ASSERT(end    < len, "Index out of range");
-		RCOM_ASSERT(start  < end,    "Invaid start and end points");
+		RCOM_ASSERT(len    >  0,   "Index out of range");
+		RCOM_ASSERT(start  >= 0,   "Index out of range");
+		RCOM_ASSERT(end    <= len, "Index out of range");
+		RCOM_ASSERT(start  <  end, "Invaid start and end points");
 
 		return {&ptr[start], end - start};
 	}
 
 	template<typename T> ArrayPtr<T> ArrayPtr<T>::slice(size_t start, size_t end)
 	{
-		RCOM_ASSERT(len    > 0,      "Index out of range");
-		RCOM_ASSERT(start  > 0,      "Index out of range");
-		RCOM_ASSERT(end    < len, "Index out of range");
-		RCOM_ASSERT(start  < end,    "Invaid start and end points");
+		RCOM_ASSERT(len    >  0,   "Index out of range");
+		RCOM_ASSERT(start  >= 0,   "Index out of range");
+		RCOM_ASSERT(end    <= len, "Index out of range");
+		RCOM_ASSERT(start  <  end, "Invaid start and end points");
 
 		return {&ptr[start], end - start};
 	}
@@ -126,20 +126,20 @@ namespace rcom
 
 	template<typename T> const BytePtr ArrayPtr<T>::byte_slice(size_t start, size_t end) const
 	{
-		RCOM_ASSERT(len   > 0,   "Index out of range");
-		RCOM_ASSERT(start > 0,   "Index out of range");
-		RCOM_ASSERT(end   < len, "Index out of range");
-		RCOM_ASSERT(start < end, "Invaid start and end points");
+		RCOM_ASSERT(len   >  0,   "Index out of range");
+		RCOM_ASSERT(start >= 0,   "Index out of range");
+		RCOM_ASSERT(end   <= len, "Index out of range");
+		RCOM_ASSERT(start <  end, "Invaid start and end points");
 
 		return {reinterpret_cast<uint8_t*>(&ptr[start]), ::byte_size<T>(end - start)};
 	}
 
 	template<typename T> BytePtr ArrayPtr<T>::byte_slice(size_t start, size_t end)
 	{
-		RCOM_ASSERT(len    > 0,      "Index out of range");
-		RCOM_ASSERT(start  > 0,      "Index out of range");
-		RCOM_ASSERT(end    < len, "Index out of range");
-		RCOM_ASSERT(start  < end,    "Invaid start and end points");
+		RCOM_ASSERT(len    >  0,   "Index out of range");
+		RCOM_ASSERT(start  >= 0,   "Index out of range");
+		RCOM_ASSERT(end    <= len, "Index out of range");
+		RCOM_ASSERT(start  <  end, "Invaid start and end points");
 
 		return {reinterpret_cast<uint8_t*>(&ptr[start]), ::byte_size<T>(end - start)};
 	}
